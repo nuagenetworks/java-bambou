@@ -147,12 +147,23 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         currentSession.set(null);
     }
 
-    public RestPushCenter getPushCenter() {
+    public RestPushCenter createPushCenter(RestPushCenterType pushCenterType) {
+        RestPushCenter pushCenter;
+
+        if (pushCenterType == RestPushCenterType.JMS) {
+            pushCenter = new RestPushCenterJms();
+        } else {
+            pushCenter = new RestPushCenterLongPoll(this);
+        }
+
         String url = getRestBaseUrl();
-        RestPushCenter pushCenter = new RestPushCenter(this);
         pushCenter.setUrl(url);
 
         return pushCenter;
+    }
+
+    public RestPushCenter getPushCenter() {
+        return createPushCenter(RestPushCenterType.LONG_POLL);
     }
 
     @Override

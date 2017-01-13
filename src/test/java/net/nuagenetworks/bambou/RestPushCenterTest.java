@@ -48,8 +48,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.nuagenetworks.bambou.RestPushCenter;
-import net.nuagenetworks.bambou.RestPushCenterListener;
 import net.nuagenetworks.bambou.RestSession;
 import net.nuagenetworks.bambou.model.Events;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
@@ -77,7 +75,7 @@ public class RestPushCenterTest {
     public void testNewPushCenter() {
         String url = "http://vsd";
 
-        RestPushCenter pushCenter = new RestPushCenter(session);
+        RestPushCenterLongPoll pushCenter = new RestPushCenterLongPoll(session);
         pushCenter.setUrl(url);
         Assert.assertEquals(url, pushCenter.getUrl());
         Assert.assertFalse(pushCenter.isRunning());
@@ -92,7 +90,7 @@ public class RestPushCenterTest {
                 EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>("{}", HttpStatus.OK)).atLeastOnce();
         EasyMock.replay(restOperations);
 
-        RestPushCenter pushCenter = new RestPushCenter(session);
+        RestPushCenterLongPoll pushCenter = new RestPushCenterLongPoll(session);
         pushCenter.setUrl(url);
         pushCenter.start();
 
@@ -124,7 +122,7 @@ public class RestPushCenterTest {
                 listenerInvocationCount++;
             }
         };
-        RestPushCenter pushCenter = new RestPushCenter(session);
+        RestPushCenterLongPoll pushCenter = new RestPushCenterLongPoll(session);
         pushCenter.setUrl(url);
         pushCenter.addListener(listener);
         pushCenter.start();
@@ -161,7 +159,7 @@ public class RestPushCenterTest {
                 EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>(mapper.writeValueAsString(events), HttpStatus.OK));
         EasyMock.replay(restOperations);
 
-        RestPushCenter pushCenter = new RestPushCenter(session);
+        RestPushCenterLongPoll pushCenter = new RestPushCenterLongPoll(session);
         pushCenter.setUrl(url);
         pushCenter.start();
 
