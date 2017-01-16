@@ -147,6 +147,18 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         currentSession.set(null);
     }
 
+    /**
+     * @deprecated use {@link #createPushCenter() or @link #createPushCenter(RestPushCenterType)} instead.
+     */
+    @Deprecated
+    public RestPushCenter getPushCenter() {
+        return createPushCenter(RestPushCenterType.LONG_POLL);
+    }
+
+    public RestPushCenter createPushCenter() {
+        return createPushCenter(RestPushCenterType.JMS); // PushCenter implementation defaults to JMS from now on
+    }
+
     public RestPushCenter createPushCenter(RestPushCenterType pushCenterType) {
         RestPushCenter pushCenter;
 
@@ -160,10 +172,6 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         pushCenter.setUrl(url);
 
         return pushCenter;
-    }
-
-    public RestPushCenter getPushCenter() {
-        return createPushCenter(RestPushCenterType.LONG_POLL);
     }
 
     @Override
