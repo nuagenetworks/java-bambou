@@ -78,7 +78,7 @@ public class RestPushCenterJms implements RestPushCenter {
             String jmsTopic = JMS_TOPIC;
 
             // Debug
-            logger.debug(
+            logger.info(
                     "Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory + " user: " + jndiUser + " passwd: " + jndiPassword);
 
             // Initialize JNDI connection
@@ -90,7 +90,7 @@ public class RestPushCenterJms implements RestPushCenter {
             context = new InitialContext(env);
 
             // Debug
-            logger.debug("Creating JMS connection using factory: " + jmsFactory + " user: " + jmsUser + " passwd: " + jmsPassword);
+            logger.info("Creating JMS connection using factory: " + jmsFactory + " user: " + jmsUser + " passwd: " + jmsPassword);
 
             // Create the JMS topic connection and start it
             TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context.lookup(jmsFactory);
@@ -98,7 +98,7 @@ public class RestPushCenterJms implements RestPushCenter {
             topicConnection.start();
 
             // Debug
-            logger.debug("Subscribing to JMS topic: " + jmsTopic);
+            logger.info("Subscribing to JMS topic: " + jmsTopic);
 
             // Create the subscriber
             Topic topic = (Topic) context.lookup(jmsTopic);
