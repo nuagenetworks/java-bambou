@@ -40,11 +40,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
-import net.nuagenetworks.bambou.util.BambouUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestSpringConfig.class, loader = AnnotationConfigContextLoader.class)
-public class BambouUtilsTest {
+public class RestUtilsTest {
 
     @Test
     public void testCreateRestObjectWithContent() throws RestException, JsonProcessingException, IOException {        
@@ -56,7 +55,7 @@ public class BambouUtilsTest {
         restObjNode.put("creationDate", "34567");
         restObjNode.put("lastUpdatedDate", "123456");
         restObjNode.put("owner", "MyOwner");
-        RestObject restObj = BambouUtils.createRestObjectWithContent(RestObject.class, restObjNode);        
+        RestObject restObj = RestUtils.createRestObjectWithContent(RestObject.class, restObjNode);        
         Assert.assertEquals("123", restObj.getId()); 
         Assert.assertEquals("456", restObj.getParentId());
         Assert.assertEquals("MyParentType", restObj.getParentType());
