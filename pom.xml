@@ -28,9 +28,9 @@
    </developers>
 
    <scm>
-      <connection>scm:git:git@github.com:nuagenetworks/java-bambou.git</connection>
-      <developerConnection>scm:git:git@github.com:nuagenetworks/java-bambou.git</developerConnection>
-      <url>git@github.com:nuagenetworks/java-bambou.git</url>
+      <connection>scm:git:https://github.com/nuagenetworks/java-bambou.git</connection>
+      <developerConnection>scm:git:https://github.com/nuagenetworks/java-bambou.git</developerConnection>
+      <url>https://github.com/nuagenetworks/java-bambou.git</url>
    </scm>
 
    <build>
