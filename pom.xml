@@ -11,7 +11,7 @@
 	<url>http://github.com/nuagenetworks/java-bambou</url>
 
 	<properties>
-		<project.scm.id>git</project.scm.id>
+		<project.scm.id>github</project.scm.id>
 	</properties>
 
 	<licenses>
