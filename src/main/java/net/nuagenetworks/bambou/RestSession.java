@@ -164,6 +164,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
         if (pushCenterType == RestPushCenterType.JMS) {
             pushCenter = new RestPushCenterJms();
+        } else if (pushCenterType == RestPushCenterType.JMS_DIRECT) {
+            pushCenter = new RestPushCenterJmsDirect();
         } else {
             pushCenter = new RestPushCenterLongPoll(this);
         }
