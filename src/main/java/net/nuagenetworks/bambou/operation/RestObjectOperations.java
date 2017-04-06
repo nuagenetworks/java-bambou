@@ -53,6 +53,8 @@ public interface RestObjectOperations {
     void instantiateChild(RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit) throws RestException;
 
     void assign(List<? extends RestObject> childRestObjs) throws RestException;
+    
+    void assign(List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException;
 
     void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
     
@@ -80,4 +82,6 @@ public interface RestObjectOperations {
     void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
     
     void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType, boolean commit) throws RestException;
+    
+    void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException;
 }

@@ -212,15 +212,20 @@ public class RestObject implements RestObjectOperations, Serializable {
     }
 
     @Override
-    public void assign(List<? extends RestObject> childRestObjs) throws RestException {
+    public void assign(List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
         if (session != null) {
-            session.assign(this, childRestObjs);
+            session.assign(this, childRestObjs, objectType);
         } else {
             throw new RestException("Session not available in current thread");
         }
     }
 
+    @Override
+    public void assign(List<? extends RestObject> childRestObjs) throws RestException {
+        assign(childRestObjs, null);
+    }
+    
     @Override
     public void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
@@ -335,6 +340,11 @@ public class RestObject implements RestObjectOperations, Serializable {
     @Override
     public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
         assign(session, childRestObjs, null, commit);
+    }
+    
+    @Override
+    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException {
+        assign(session, childRestObjs, objectType, true);
     }
     
     @Override
