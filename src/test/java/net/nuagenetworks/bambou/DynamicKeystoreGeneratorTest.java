@@ -185,7 +185,9 @@ public class DynamicKeystoreGeneratorTest {
         InputStream is = new ByteArrayInputStream(GOOD_TESTABLE_CERTIFICATE.getBytes());
         Certificate certificate = DynamicKeystoreGenerator.generateX509Certificate(is);
         Assert.assertEquals("Certificate type ", "X.509", certificate.getType());
-//        Assert.assertEquals("Certificate length ", 2893, certificate.toString().length());
+        // NOTE: the certificate length computed below appears to vary from machine to machine. 
+        // Need to understand why that is. Commenting out for now.
+        // Assert.assertEquals("Certificate length ", 2893, certificate.toString().length());
         Assert.assertEquals("Certificate public key algorithm ", "RSA", certificate.getPublicKey().getAlgorithm());
         Assert.assertEquals("Certificate public key format ", "X.509", certificate.getPublicKey().getFormat());
         Assert.assertEquals("Certificate public key length ", 683, certificate.getPublicKey().toString().length());
