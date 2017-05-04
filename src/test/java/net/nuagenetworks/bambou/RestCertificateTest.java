@@ -224,7 +224,7 @@ public class RestCertificateTest {
         Assert.assertEquals("Check private key decoded length", 1123, len);
 
         try {
-            RSAPrivateKey rsaPrivateKey = DynamicKeystoreGenerator.generateRSAPrivateKey(decodedPrivateKey);
+            DynamicKeystoreGenerator.generateRSAPrivateKey(decodedPrivateKey);
             Assert.assertFalse(false);
         } catch (KeyManagementException ex) {
             Assert.assertThat(ex.getMessage(), CoreMatchers.containsString("InvalidKeySpecException"));
