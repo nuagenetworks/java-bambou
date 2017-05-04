@@ -52,7 +52,7 @@ import java.security.cert.Certificate;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestSpringConfig.class, loader = AnnotationConfigContextLoader.class)
-public class RestCertificateTest {
+public class DynamicKeystoreGeneratorTest {
     // to generate text like this, run 2 commands below. Edit junit.pem2 file in
     // text editor. Copy contents here. Add line feed chars
     // openssl.exe genrsa -aes256 -out junit.keystep1 2048
