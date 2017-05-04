@@ -56,7 +56,7 @@ public class RestClientTemplate extends RestTemplate {
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
     }
-    
+
     public void setSocketTimeout(int socketTimeout) {
         if (socketTimeout > 0) {
             // Debug
@@ -88,11 +88,12 @@ public class RestClientTemplate extends RestTemplate {
 
             // Install the new trust manager
             SSLContext sc = SSLContext.getInstance("SSL");
-            
-            // Install a key manager if we have client certificates to authenticate through SSL
+
+            // Install a key manager if we have client certificates to
+            // authenticate through SSL
             KeyManager[] keyManagers = {};
             if (certificateFilePairPaths != null && certificateFilePairPaths.length != 0) {
-            	keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateFilePairPaths);
+                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateFilePairPaths);
             }
 
             sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
