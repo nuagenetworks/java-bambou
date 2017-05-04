@@ -34,12 +34,14 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
 import net.nuagenetworks.bambou.ssl.NaiveHostnameVerifier;
 import net.nuagenetworks.bambou.ssl.X509NaiveTrustManager;
 
@@ -53,7 +55,6 @@ public class RestClientTemplate extends RestTemplate {
         setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
-        disableSslVerification();
     }
 
     public void setSocketTimeout(int socketTimeout) {
@@ -80,14 +81,22 @@ public class RestClientTemplate extends RestTemplate {
         }
     }
 
-    private void disableSslVerification() {
+    public void prepareSSLAuthentication(String[] certificateFilePairPaths) {
         try {
             // Create a trust manager that doesn't validate cert chains
             TrustManager[] trustAllCerts = new TrustManager[] { new X509NaiveTrustManager() };
 
             // Install the new trust manager
             SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            // Install a key manager if we have client certificates to
+            // authenticate through SSL
+            KeyManager[] keyManagers = {};
+            if (certificateFilePairPaths != null && certificateFilePairPaths.length != 0) {
+                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateFilePairPaths);
+            }
+
+            sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             // Create host verifier

@@ -57,7 +57,6 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     private String apiUrl;
     private String apiPrefix;
     private double version;
-    private String certificate;
     private String apiKey;
     private Class<R> restRootObjClass;
     private R restRootObj;
@@ -112,14 +111,6 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     public void setVersion(double version) {
         this.version = version;
-    }
-
-    public String getCertificate() {
-        return certificate;
-    }
-
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
     }
 
     protected void setApiKey(String apiKey) {
@@ -345,9 +336,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     private String getAuthenticationHeader() {
-        if (certificate != null) {
-            return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, "").getBytes()));
-        } else if (apiKey != null) {
+        if (apiKey != null) {
             return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, apiKey).getBytes()));
         } else {
             return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, password).getBytes()));
@@ -357,7 +346,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     @Override
     public String toString() {
         return "RestSession [restClientService=" + restClientService + ", username=" + username + ", password=" + password + ", enterprise=" + enterprise
-                + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", version=" + version + ", certificate=" + certificate + ", apiKey=" + apiKey
+                + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", version=" + version + ", apiKey=" + apiKey
                 + ", restRootObjClass=" + restRootObjClass + ", restRootObj=" + restRootObj + "]";
     }
 }
