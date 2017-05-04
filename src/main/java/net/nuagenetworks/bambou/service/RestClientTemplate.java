@@ -105,9 +105,9 @@ public class RestClientTemplate extends RestTemplate {
             // Install the host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         } catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
+            logger.error("Error", ex);
         } catch (KeyManagementException ex) {
-            ex.printStackTrace();
+            logger.error("Error", ex);
         }
     }
 }
