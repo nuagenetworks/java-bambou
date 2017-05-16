@@ -1,6 +1,7 @@
 package net.nuagenetworks.bambou.ssl;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -9,11 +10,11 @@ import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -40,36 +41,36 @@ public class DynamicKeystoreGenerator {
     private static final String KEY_CHARSET = "UTF-8";
     private static final String PRIVATE_KEY_HEADER_TRAILER_REGEX = "(-+BEGIN PRIVATE KEY-+\\r?\\n|-+END PRIVATE KEY-+\\r?\\n?)";
 
-    private DynamicKeystoreGenerator() {}
+    private DynamicKeystoreGenerator() {
+    }
 
-    public static KeyManager[] generateKeyManagersForCertificates(String[] certificateFilePairPaths) throws KeyManagementException {
-        logger.debug("Creating a key manager for files : " + certificateFilePairPaths[0] + " and " + certificateFilePairPaths[1]);
+    public static KeyManager[] generateKeyManagersForCertificates(String[] certificateContentPair) throws KeyManagementException {
+        logger.debug("Creating a key manager for certificate : " + certificateContentPair[0] + " and private key : " + certificateContentPair[1]);
         try {
-            String pathToCertificatePEMFile = certificateFilePairPaths[0];
-            String pathToPrivateKeyPEMFile = certificateFilePairPaths[1];
+            String certificateContent = certificateContentPair[0];
+            String privateKeyContent = certificateContentPair[1];
             KeyManager[] keyManagers = {};
-            Certificate certificate = getCertificate(pathToCertificatePEMFile);
+            Certificate certificate = getCertificate(certificateContent);
 
-            String keyFileContents = getContentsOfPrivateKeyPEMFile(pathToPrivateKeyPEMFile);
-            byte[] decodedPrivateKey = getDecodedPrivateKey(keyFileContents);
+            byte[] decodedPrivateKey = getDecodedPrivateKey(privateKeyContent);
 
             RSAPrivateKey rsaPrivateKey = generateRSAPrivateKey(decodedPrivateKey);
 
             KeyStore keystore = createAndLoadDynamicKeystore(rsaPrivateKey, certificate);
             keyManagers = generateKeyManagersForDynamicKeystore(keystore);
             return keyManagers;
-        } catch (Exception e) {
-            throw new KeyManagementException(e);
+        } catch (Exception ex) {
+            throw new KeyManagementException(ex);
         }
     }
 
-    public static Certificate getCertificate(String certificatePEMFile) throws KeyManagementException {
-        logger.debug("Creating a Certificate for file : " + certificatePEMFile);
+    public static Certificate getCertificate(String certificateContent) throws KeyManagementException {
+        logger.debug("Creating a Certificate for : " + certificateContent);
         Certificate certificate = null;
-        try (FileInputStream fis = new FileInputStream(certificatePEMFile)) {
-            certificate = generateX509Certificate(fis);
-        } catch (IOException e) {
-            throw new KeyManagementException(e);
+        try (InputStream bais = new ByteArrayInputStream(certificateContent.getBytes())) {
+            certificate = generateX509Certificate(bais);
+        } catch (IOException ex) {
+            throw new KeyManagementException(ex);
         }
         return certificate;
     }
@@ -80,24 +81,24 @@ public class DynamicKeystoreGenerator {
         try {
             CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_FACTORY_INSTANCE_TYPE);
             certificate = cf.generateCertificate(is);
-        } catch (CertificateException e) {
-            throw new KeyManagementException(e);
+        } catch (CertificateException ex) {
+            throw new KeyManagementException(ex);
         }
         return certificate;
     }
 
-    public static String getContentsOfPrivateKeyPEMFile(String privateKeyPEMFile) throws KeyManagementException {
-        logger.debug("Reading key contents for file : " + privateKeyPEMFile);
+    public static String getContentsOfPEMFile(File pemFile) throws KeyManagementException {
+        logger.debug("Reading key contents for file : " + pemFile);
         byte[] keyFileBytes = {};
-        String privateKeyContents = "";
+        String pemFileContents = "";
         try {
-            Path path = Paths.get(privateKeyPEMFile);
+            Path path = Paths.get(pemFile.getPath());
             keyFileBytes = Files.readAllBytes(path);
-            privateKeyContents = new String(keyFileBytes, KEY_CHARSET);
-        } catch (IOException e) {
-            throw new KeyManagementException(e);
+            pemFileContents = new String(keyFileBytes, KEY_CHARSET);
+        } catch (IOException ex) {
+            throw new KeyManagementException(ex);
         }
-        return privateKeyContents;
+        return pemFileContents;
     }
 
     public static byte[] getDecodedPrivateKey(String keyFileContents) {
@@ -117,8 +118,8 @@ public class DynamicKeystoreGenerator {
         try {
             keyFactory = KeyFactory.getInstance(KEY_FACTORY_INSTANCE_TYPE);
             rsaPrivateKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new KeyManagementException(e);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            throw new KeyManagementException(ex);
         }
         return rsaPrivateKey;
     }
@@ -133,8 +134,8 @@ public class DynamicKeystoreGenerator {
             keystore = KeyStore.getInstance(KEYSTORE_INSTANCE_TYPE);
             keystore.load(null, null);
             keystore.setEntry(KEYSTORE_ALIAS, privateKeyEntry, protectionParameter);
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-            throw new KeyManagementException(e);
+        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException ex) {
+            throw new KeyManagementException(ex);
         }
         return keystore;
     }
@@ -147,8 +148,8 @@ public class DynamicKeystoreGenerator {
             keyManagerFactory = KeyManagerFactory.getInstance(KEY_MANAGER_FACTORY_ALGORITHM);
             keyManagerFactory.init(keystore, KEY_PASSWORD);
             keyManagers = keyManagerFactory.getKeyManagers();
-        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
-            throw new KeyManagementException(e);
+        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
+            throw new KeyManagementException(ex);
         }
         return keyManagers;
     }

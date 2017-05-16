@@ -26,6 +26,7 @@
 */
 package net.nuagenetworks.bambou.service;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
@@ -81,7 +82,27 @@ public class RestClientTemplate extends RestTemplate {
         }
     }
 
-    public void prepareSSLAuthentication(String[] certificateFilePairPaths) {
+    public void prepareSSLAuthentication(File[] certificateFilePairPaths) {
+        try {
+            String[] certificateContentPair;
+            if (certificateFilePairPaths != null && certificateFilePairPaths.length != 0) {
+                // Read the content of the certificate and private key files
+                File pathToCertificatePEMFile = certificateFilePairPaths[0];
+                File pathToPrivateKeyPEMFile = certificateFilePairPaths[1];                
+                String certificateContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToCertificatePEMFile);
+                String privateKeyContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToPrivateKeyPEMFile);                                
+                certificateContentPair = new String[] { certificateContent, privateKeyContent };
+            } else {
+                certificateContentPair = new String[0];
+            }
+
+            prepareSSLAuthentication(certificateContentPair);
+        } catch (KeyManagementException ex) {
+            logger.error("Error", ex);
+        }
+    }
+
+    public void prepareSSLAuthentication(String[] certificateContentPair) {
         try {
             // Create a trust manager that doesn't validate cert chains
             TrustManager[] trustAllCerts = new TrustManager[] { new X509NaiveTrustManager() };
@@ -92,8 +113,8 @@ public class RestClientTemplate extends RestTemplate {
             // Install a key manager if we have client certificates to
             // authenticate through SSL
             KeyManager[] keyManagers = {};
-            if (certificateFilePairPaths != null && certificateFilePairPaths.length != 0) {
-                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateFilePairPaths);
+            if (certificateContentPair != null && certificateContentPair.length != 0) {
+                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateContentPair);
             }
 
             sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
