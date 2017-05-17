@@ -26,6 +26,8 @@
 */
 package net.nuagenetworks.bambou;
 
+import java.io.File;
+import java.security.KeyManagementException;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
@@ -39,6 +41,8 @@ import org.springframework.http.ResponseEntity;
 
 import net.nuagenetworks.bambou.operation.RestSessionOperations;
 import net.nuagenetworks.bambou.service.RestClientService;
+import net.nuagenetworks.bambou.service.RestClientTemplate;
+import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
 
 public class RestSession<R extends RestRootObject> implements RestSessionOperations {
 
@@ -51,11 +55,16 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     @Autowired
     private RestClientService restClientService;
 
+    @Autowired
+    private RestClientTemplate restClientTemplate;
+
     private String username;
     private String password;
     private String enterprise;
     private String apiUrl;
     private String apiPrefix;
+    private String certificate;
+    private String privateKey;
     private double version;
     private String apiKey;
     private Class<R> restRootObjClass;
@@ -105,6 +114,22 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         this.apiPrefix = apiPrefix;
     }
 
+    public String getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
     public double getVersion() {
         return version;
     }
@@ -139,7 +164,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     /**
-     * @deprecated use {@link #createPushCenter() or @link #createPushCenter(RestPushCenterType)} instead.
+     * @deprecated use {@link #createPushCenter() or @link
+     *             #createPushCenter(RestPushCenterType)} instead.
      */
     @Deprecated
     public RestPushCenter getPushCenter() {
@@ -147,7 +173,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     public RestPushCenter createPushCenter() {
-        return createPushCenter(RestPushCenterType.JMS); // PushCenter implementation defaults to JMS from now on
+        // PushCenter implementation defaults to JMS from now on
+        return createPushCenter(RestPushCenterType.JMS); 
     }
 
     public RestPushCenter createPushCenter(RestPushCenterType pushCenterType) {
@@ -313,6 +340,25 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(version).replace('.', '_'));
     }
 
+    protected void prepareSSLAuthentication(File pathToCertificatePEMFile, File pathToPrivateKeyPEMFile) {
+        try {
+            // Read the content of the certificate and private key files
+            String certificateContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToCertificatePEMFile);
+            String privateKeyContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToPrivateKeyPEMFile);
+
+            prepareSSLAuthentication(certificateContent, privateKeyContent);
+        } catch (KeyManagementException ex) {
+            logger.error("Error", ex);
+        }
+    }
+
+    protected void prepareSSLAuthentication(String certificateContent, String privateKeyContent) {
+        setCertificate(certificateContent);
+        setPrivateKey(privateKeyContent);
+
+        restClientTemplate.prepareSSLAuthentication(certificateContent, privateKeyContent);
+    }
+
     private synchronized void authenticate() throws RestException {
         // Create the root object if needed
         if (restRootObj == null) {
@@ -345,8 +391,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     @Override
     public String toString() {
-        return "RestSession [restClientService=" + restClientService + ", username=" + username + ", password=" + password + ", enterprise=" + enterprise
-                + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", version=" + version + ", apiKey=" + apiKey
-                + ", restRootObjClass=" + restRootObjClass + ", restRootObj=" + restRootObj + "]";
+        return "RestSession [restClientService=" + restClientService + ", restClientTemplate=" + restClientTemplate + ", username=" + username + ", password="
+                + password + ", enterprise=" + enterprise + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", certificate=" + certificate + ", privateKey="
+                + privateKey + ", version=" + version + ", apiKey=" + apiKey + ", restRootObjClass=" + restRootObjClass + ", restRootObj=" + restRootObj + "]";
     }
 }

@@ -44,11 +44,9 @@ public class DynamicKeystoreGenerator {
     private DynamicKeystoreGenerator() {
     }
 
-    public static KeyManager[] generateKeyManagersForCertificates(String[] certificateContentPair) throws KeyManagementException {
-        logger.debug("Creating a key manager for certificate : " + certificateContentPair[0] + " and private key : " + certificateContentPair[1]);
+    public static KeyManager[] generateKeyManagersForCertificates(String certificateContent, String privateKeyContent) throws KeyManagementException {
+        logger.debug("Creating a key manager for certificate : " + certificateContent + " and private key : " + privateKeyContent);
         try {
-            String certificateContent = certificateContentPair[0];
-            String privateKeyContent = certificateContentPair[1];
             KeyManager[] keyManagers = {};
             Certificate certificate = getCertificate(certificateContent);
 
