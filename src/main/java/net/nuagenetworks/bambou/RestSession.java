@@ -26,8 +26,6 @@
 */
 package net.nuagenetworks.bambou;
 
-import java.io.File;
-import java.security.KeyManagementException;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
@@ -41,7 +39,6 @@ import org.springframework.http.ResponseEntity;
 
 import net.nuagenetworks.bambou.operation.RestSessionOperations;
 import net.nuagenetworks.bambou.service.RestClientService;
-import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
 
 public class RestSession<R extends RestRootObject> implements RestSessionOperations {
 
@@ -149,6 +146,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     @Override
     public void start() throws RestException {
         currentSession.set(this);
+        restClientService.prepareSSLAuthentication(certificate, privateKey);
         authenticate();
     }
 
@@ -334,32 +332,6 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     protected String getRestBaseUrl() {
         return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(version).replace('.', '_'));
-    }
-
-    protected void prepareSSLAuthentication(File pathToCertificatePEMFile, File pathToPrivateKeyPEMFile) {
-        try {
-            // Read the content of the certificate and private key files
-            String certificateContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToCertificatePEMFile);
-            String privateKeyContent = DynamicKeystoreGenerator.getContentsOfPEMFile(pathToPrivateKeyPEMFile);
-
-            prepareSSLAuthentication(certificateContent, privateKeyContent);
-        } catch (KeyManagementException ex) {
-            logger.error("Error", ex);
-        }
-    }
-
-    protected void prepareSSLAuthentication(String certificateContent, String privateKeyContent) {
-        setCertificate(certificateContent);
-        setPrivateKey(privateKeyContent);
-
-        restClientService.prepareSSLAuthentication(certificateContent, privateKeyContent);
-    }
-
-    protected void prepareSSLAuthentication() {
-        setCertificate(null);
-        setPrivateKey(null);
-
-        restClientService.prepareSSLAuthentication(null, null);
     }
 
     private synchronized void authenticate() throws RestException {
