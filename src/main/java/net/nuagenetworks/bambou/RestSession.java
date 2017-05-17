@@ -355,6 +355,13 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         restClientService.prepareSSLAuthentication(certificateContent, privateKeyContent);
     }
 
+    protected void prepareSSLAuthentication() {
+        setCertificate(null);
+        setPrivateKey(null);
+
+        restClientService.prepareSSLAuthentication(null, null);
+    }
+
     private synchronized void authenticate() throws RestException {
         // Create the root object if needed
         if (restRootObj == null) {
