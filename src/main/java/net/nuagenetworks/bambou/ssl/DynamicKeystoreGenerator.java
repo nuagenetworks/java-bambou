@@ -1,6 +1,7 @@
 package net.nuagenetworks.bambou.ssl;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -84,12 +85,12 @@ public class DynamicKeystoreGenerator {
         return certificate;
     }
 
-    public static String getContentsOfPEMFile(String pemFile) throws KeyManagementException {
+    public static String getContentsOfPEMFile(File pemFile) throws KeyManagementException {
         logger.debug("Reading key contents for file : " + pemFile);
         byte[] keyFileBytes = {};
         String pemFileContents = "";
         try {
-            Path path = Paths.get(pemFile);
+            Path path = Paths.get(pemFile.getPath());
             keyFileBytes = Files.readAllBytes(path);
             pemFileContents = new String(keyFileBytes, KEY_CHARSET);
         } catch (IOException ex) {
