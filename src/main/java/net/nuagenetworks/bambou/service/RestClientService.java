@@ -27,6 +27,14 @@
 package net.nuagenetworks.bambou.service;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +56,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import net.nuagenetworks.bambou.RestException;
 import net.nuagenetworks.bambou.RestStatusCodeException;
+import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
+import net.nuagenetworks.bambou.ssl.NaiveHostnameVerifier;
+import net.nuagenetworks.bambou.ssl.X509NaiveTrustManager;
 import net.nuagenetworks.bambou.util.BambouUtils;
 
 @Service
@@ -56,6 +67,36 @@ public class RestClientService {
 
     @Autowired
     private RestOperations restOperations;
+
+    public void prepareSSLAuthentication(String certificateContent, String privateKeyContent) {
+        try {
+            // Create a trust manager that doesn't validate cert chains
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509NaiveTrustManager() };
+
+            // Install the new trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+
+            // Install a key manager if we have client certificates to
+            // authenticate through SSL
+            KeyManager[] keyManagers = {};
+            if (certificateContent != null && privateKeyContent != null) {
+                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateContent, privateKeyContent);
+            }
+
+            sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            // Create host verifier
+            HostnameVerifier allHostsValid = new NaiveHostnameVerifier();
+
+            // Install the host verifier
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (NoSuchAlgorithmException ex) {
+            logger.error("Error", ex);
+        } catch (KeyManagementException ex) {
+            logger.error("Error", ex);
+        }
+    }
 
     public <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String url, HttpHeaders headers, U requestObject, Class<T> responseType)
             throws RestException {

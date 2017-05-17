@@ -29,21 +29,9 @@ package net.nuagenetworks.bambou.service;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-
-import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
-import net.nuagenetworks.bambou.ssl.NaiveHostnameVerifier;
-import net.nuagenetworks.bambou.ssl.X509NaiveTrustManager;
 
 public class RestClientTemplate extends RestTemplate {
 
@@ -78,36 +66,6 @@ public class RestClientTemplate extends RestTemplate {
             SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
             Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(host, port));
             requestFactory.setProxy(proxy);
-        }
-    }
-
-    public void prepareSSLAuthentication(String certificateContent, String privateKeyContent) {
-        try {
-            // Create a trust manager that doesn't validate cert chains
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509NaiveTrustManager() };
-
-            // Install the new trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-
-            // Install a key manager if we have client certificates to
-            // authenticate through SSL
-            KeyManager[] keyManagers = {};
-            if (certificateContent != null && privateKeyContent != null) {
-                keyManagers = DynamicKeystoreGenerator.generateKeyManagersForCertificates(certificateContent, privateKeyContent);
-            }
-
-            sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-            // Create host verifier
-            HostnameVerifier allHostsValid = new NaiveHostnameVerifier();
-
-            // Install the host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (NoSuchAlgorithmException ex) {
-            logger.error("Error", ex);
-        } catch (KeyManagementException ex) {
-            logger.error("Error", ex);
         }
     }
 }
