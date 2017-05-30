@@ -15,21 +15,20 @@ import org.slf4j.LoggerFactory;
 
 import net.nuagenetworks.bambou.jms.AbstractPushCenterJms;
 
-public class RestPushCenterJms extends AbstractPushCenterJms {
+public class RestPushCenterJmsActiveMQ extends AbstractPushCenterJms {
 
-    private final static String JNDI_FACTORY = "org.jboss.naming.remote.client.InitialContextFactory";
-    private final static String JMS_FACTORY = "jms/RemoteConnectionFactory";
-    private final static String JNDI_USER = "vsduser";
-    private final static String JNDI_PASSWORD = "vsdpass";
-    private final static String JMS_USER = "jmsuser@system";
-    private final static String JMS_PASSWORD = "jmspass";
-    private final static int JMS_PORT = 4447;
+    private final static String JNDI_FACTORY = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
+    private final static String JMS_FACTORY = "ConnectionFactory";
+    private final static String JMS_USER = "jmsclient@csp";
+    private final static String JMS_PASSWORD = "clientpass";
+    private final static String PROVIDER_URL_FMT = "tcp://%s:%d?wireFormat.cacheEnabled=false&wireFormat.tightEncodingEnabled=false";
+    private final static int JMS_PORT = 61616;
 
-    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJms.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsActiveMQ.class);
     
     protected InitialContext context;
 
-    protected RestPushCenterJms() {
+    protected RestPushCenterJmsActiveMQ() {
         jmsHost = null;
         jmsPort = JMS_PORT;
         jmsUser = JMS_USER;
@@ -39,22 +38,17 @@ public class RestPushCenterJms extends AbstractPushCenterJms {
     
     public synchronized void start() throws RestException {
         try {
-            String jndiProviderUrl = "remote://" + jmsHost + ":" + jmsPort;
+            String jndiProviderUrl = String.format(PROVIDER_URL_FMT, jmsHost, jmsPort);
             String jndiFactory = JNDI_FACTORY;
-            String jndiUser = JNDI_USER;
-            String jndiPassword = JNDI_PASSWORD;
             String jmsFactory = JMS_FACTORY;
 
             // Debug
-            logger.debug(
-                    "Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory + " user: " + jndiUser + " passwd: " + jndiPassword);
+            logger.debug("Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory);
 
             // Initialize JNDI connection
             Properties env = new Properties();
             env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
             env.put(Context.PROVIDER_URL, jndiProviderUrl);
-            env.put(Context.SECURITY_PRINCIPAL, jndiUser);
-            env.put(Context.SECURITY_CREDENTIALS, jndiPassword);
             context = new InitialContext(env);
 
             // Debug
@@ -72,7 +66,7 @@ public class RestPushCenterJms extends AbstractPushCenterJms {
             Topic topic = (Topic) context.lookup(jmsTopic);
             TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
             createSubscriber(topicSession, topic);
-            
+
             // Debug
             logger.info("JMS connection started");
         } catch (NamingException | JMSException ex) {

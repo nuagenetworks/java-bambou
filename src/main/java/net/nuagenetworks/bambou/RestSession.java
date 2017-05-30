@@ -168,7 +168,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     public RestPushCenter createPushCenter() {
         // PushCenter implementation defaults to JMS from now on
-        return createPushCenter(RestPushCenterType.JMS); 
+        return createPushCenter(RestPushCenterType.JMS);
     }
 
     public RestPushCenter createPushCenter(RestPushCenterType pushCenterType) {
@@ -178,6 +178,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
             pushCenter = new RestPushCenterJms();
         } else if (pushCenterType == RestPushCenterType.JMS_DIRECT) {
             pushCenter = new RestPushCenterJmsDirect();
+        } else if (pushCenterType == RestPushCenterType.JMS_ACTIVEMQ) {
+            pushCenter = new RestPushCenterJmsActiveMQ();
         } else {
             pushCenter = new RestPushCenterLongPoll(this);
         }
