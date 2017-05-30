@@ -26,7 +26,7 @@ public class RestPushCenterJmsActiveMQ extends AbstractPushCenterJms {
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsActiveMQ.class);
     
-    protected InitialContext context;
+    private InitialContext context;
 
     protected RestPushCenterJmsActiveMQ() {
         jmsHost = null;

@@ -27,7 +27,7 @@ public class RestPushCenterJms extends AbstractPushCenterJms {
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJms.class);
     
-    protected InitialContext context;
+    private InitialContext context;
 
     protected RestPushCenterJms() {
         jmsHost = null;
