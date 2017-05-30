@@ -56,16 +56,16 @@ public class RestPushCenterJmsDirect extends AbstractPushCenterJms {
 
                 // Create transport configuration - connecting directly to VSD,
                 // bypassing JNDI factory
-                TransportConfiguration tc = new TransportConfiguration(NettyConnectorFactory.class.getName(), transportConfigParams);
-                HornetQTopicConnectionFactory tcf = new HornetQTopicConnectionFactory(haMode, tc);
-                tcf.setClientFailureCheckPeriod(NETTY_DEFAULT_CLIENT_FAILURE_CHECK_PERIOD);
-                tcf.setConnectionTTL(NETTY_DEFAULT_CONNECTION_TTL);
-                tcf.setReconnectAttempts(NETTY_DEFAULT_RECONNECT_ATTEMPTS);
-                tcf.setRetryInterval(NETTY_DEFAULT_RETRY_INTERVAL);
-                tcf.setMaxRetryInterval(NETTY_DEFAULT_MAX_RETRY_INTERVAL);
+                TransportConfiguration transportConfig = new TransportConfiguration(NettyConnectorFactory.class.getName(), transportConfigParams);
+                HornetQTopicConnectionFactory topicConnectionFactory = new HornetQTopicConnectionFactory(haMode, transportConfig);
+                topicConnectionFactory.setClientFailureCheckPeriod(NETTY_DEFAULT_CLIENT_FAILURE_CHECK_PERIOD);
+                topicConnectionFactory.setConnectionTTL(NETTY_DEFAULT_CONNECTION_TTL);
+                topicConnectionFactory.setReconnectAttempts(NETTY_DEFAULT_RECONNECT_ATTEMPTS);
+                topicConnectionFactory.setRetryInterval(NETTY_DEFAULT_RETRY_INTERVAL);
+                topicConnectionFactory.setMaxRetryInterval(NETTY_DEFAULT_MAX_RETRY_INTERVAL);
 
                 // Create the JMS topic connection and start it
-                topicConnection = tcf.createTopicConnection(jmsUser, jmsPassword);
+                topicConnection = topicConnectionFactory.createTopicConnection(jmsUser, jmsPassword);
                 topicConnection.start();
 
                 // Debug

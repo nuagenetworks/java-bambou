@@ -26,6 +26,7 @@ import net.nuagenetworks.bambou.RestPushCenter;
 import net.nuagenetworks.bambou.RestPushCenterListener;
 
 public abstract class AbstractPushCenterJms implements RestPushCenter {
+
     protected final static String JMS_TOPIC = "jms/topic/CNAMessages";
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractPushCenterJms.class);
