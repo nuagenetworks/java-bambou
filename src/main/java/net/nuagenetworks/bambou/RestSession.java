@@ -175,11 +175,21 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         RestPushCenter pushCenter;
 
         if (pushCenterType == RestPushCenterType.JMS) {
-            pushCenter = new RestPushCenterJms();
+            if (version >= 5.0) {
+                // VSD version 5.0.x uses a different JMS client than previous releases
+                RestPushCenterJmsActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsActiveMQ();
+                if (username != null && password != null && enterprise != null) {
+                    String jmsUser = username + "@" + enterprise;
+                    String jmsPassword = password;
+                    pushCenterJmsActiveMQ.setUser(jmsUser);
+                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
+                }
+                pushCenter = pushCenterJmsActiveMQ;
+            } else {
+                pushCenter = new RestPushCenterJmsJBoss();
+            }
         } else if (pushCenterType == RestPushCenterType.JMS_DIRECT) {
-            pushCenter = new RestPushCenterJmsDirect();
-        } else if (pushCenterType == RestPushCenterType.JMS_ACTIVEMQ) {
-            pushCenter = new RestPushCenterJmsActiveMQ();
+            pushCenter = new RestPushCenterJmsJBossDirect();
         } else {
             pushCenter = new RestPushCenterLongPoll(this);
         }

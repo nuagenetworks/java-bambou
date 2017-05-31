@@ -12,9 +12,7 @@ import org.hornetq.jms.client.HornetQTopicConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.nuagenetworks.bambou.jms.AbstractPushCenterJms;
-
-public class RestPushCenterJmsDirect extends AbstractPushCenterJms {
+public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
 
     private final static String JMS_USER = "jmsuser@system";
     private final static String JMS_PASSWORD = "jmspass";
@@ -25,7 +23,7 @@ public class RestPushCenterJmsDirect extends AbstractPushCenterJms {
     private final static int NETTY_DEFAULT_RETRY_INTERVAL = 10000;
     private final static int NETTY_DEFAULT_MAX_RETRY_INTERVAL = 60000;
 
-    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsDirect.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsJBossDirect.class);
     
     private boolean haMode;
     private Object waitObj = new Object();
@@ -34,7 +32,7 @@ public class RestPushCenterJmsDirect extends AbstractPushCenterJms {
         this.haMode = haMode;
     }
 
-    protected RestPushCenterJmsDirect() {
+    protected RestPushCenterJmsJBossDirect() {
         jmsHost = null;
         jmsPort = DEFAULT_MESSAGING_PORT;
         jmsUser = JMS_USER;

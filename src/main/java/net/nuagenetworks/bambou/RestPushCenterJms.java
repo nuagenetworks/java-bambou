@@ -1,95 +1,137 @@
 package net.nuagenetworks.bambou;
 
-import java.util.Properties;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicConnection;
 import javax.jms.TopicSession;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.nuagenetworks.bambou.jms.AbstractPushCenterJms;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class RestPushCenterJms extends AbstractPushCenterJms {
+public abstract class RestPushCenterJms implements RestPushCenter {
 
-    private final static String JNDI_FACTORY = "org.jboss.naming.remote.client.InitialContextFactory";
-    private final static String JMS_FACTORY = "jms/RemoteConnectionFactory";
-    private final static String JNDI_USER = "vsduser";
-    private final static String JNDI_PASSWORD = "vsdpass";
-    private final static String JMS_USER = "jmsuser@system";
-    private final static String JMS_PASSWORD = "jmspass";
-    private final static int JMS_PORT = 4447;
+    protected final static String JMS_TOPIC = "jms/topic/CNAMessages";
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJms.class);
-    
-    private InitialContext context;
 
-    protected RestPushCenterJms() {
-        jmsHost = null;
-        jmsPort = JMS_PORT;
-        jmsUser = JMS_USER;
-        jmsPassword = JMS_PASSWORD;
-        jmsTopic = JMS_TOPIC;
+    protected String jmsHost;
+    protected int jmsPort;
+    protected String jmsUser;
+    protected String jmsPassword;
+    protected String jmsTopic;
+    protected TopicConnection topicConnection;
+    protected List<RestPushCenterListener> listeners = new ArrayList<RestPushCenterListener>();
+
+    public void setPort(int jmsPort) {
+        this.jmsPort = jmsPort;
     }
-    
-    public synchronized void start() throws RestException {
-        try {
-            String jndiProviderUrl = "remote://" + jmsHost + ":" + jmsPort;
-            String jndiFactory = JNDI_FACTORY;
-            String jndiUser = JNDI_USER;
-            String jndiPassword = JNDI_PASSWORD;
-            String jmsFactory = JMS_FACTORY;
 
-            // Debug
-            logger.debug(
-                    "Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory + " user: " + jndiUser + " passwd: " + jndiPassword);
+    public void setHost(String jmsHost) {
+        this.jmsHost = jmsHost;
+    }
 
-            // Initialize JNDI connection
-            Properties env = new Properties();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
-            env.put(Context.PROVIDER_URL, jndiProviderUrl);
-            env.put(Context.SECURITY_PRINCIPAL, jndiUser);
-            env.put(Context.SECURITY_CREDENTIALS, jndiPassword);
-            context = new InitialContext(env);
+    public void setUser(String jmsUser) {
+        this.jmsUser = jmsUser;
+    }
 
-            // Debug
-            logger.debug("Creating JMS connection using factory: " + jmsFactory + " user: " + jmsUser + " passwd: " + jmsPassword);
+    public void setPassword(String jmsPassword) {
+        this.jmsPassword = jmsPassword;
+    }
 
-            // Create the JMS topic connection and start it
-            TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context.lookup(jmsFactory);
-            topicConnection = topicConnectionFactory.createTopicConnection(jmsUser, jmsPassword);
-            topicConnection.start();
+    public void setTopic(String jmsTopic) {
+        this.jmsTopic = jmsTopic;
+    }
 
-            // Debug
-            logger.debug("Subscribing to JMS topic: " + jmsTopic);
-
-            // Create the subscriber
-            Topic topic = (Topic) context.lookup(jmsTopic);
-            TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-            createSubscriber(topicSession, topic);
-            
-            // Debug
-            logger.info("JMS connection started");
-        } catch (NamingException | JMSException ex) {
-            throw new RestException(ex);
+    public void addListener(RestPushCenterListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
         }
     }
-    
+
+    public void removeListener(RestPushCenterListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
+    public void setUrl(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            jmsHost = url.getHost();
+        } catch (MalformedURLException ex) {
+            logger.error("Error", ex);
+        }
+    }
+
     public synchronized void stop() {
         try {
-            // Close JNDI
-            if (context != null) {
-                context.close();
+            // Close topic connection
+            if (topicConnection != null) {
+                topicConnection.close();
             }
 
-            super.stop();
-        } catch (NamingException ex) {
-            logger.error("Error" , ex);
+            // Debug
+            logger.info("JMS connection stopped");
+        } catch (JMSException ex) {
+            logger.error("Error", ex);
+        }
+    }
+
+    protected void createSubscriber(TopicSession topicSession, Topic topic) throws JMSException {
+        // Create subscriber
+        MessageConsumer subscriber = topicSession.createConsumer(topic);
+
+        // Attach message listener to subscriber
+        subscriber.setMessageListener(new MessageListener() {
+            public void onMessage(javax.jms.Message message) {
+                try {
+                    // Process the message
+                    processMessage(message);
+                } catch (Exception ex) {
+                    // Error
+                    logger.error("Error", ex);
+                }
+            }
+        });
+    }
+
+    protected void processMessage(Message message) throws Exception {
+        // Get the message
+        TextMessage text = (TextMessage) message;
+        String json = text.getText();
+
+        // Debug
+        logger.debug("Processing message: " + json);
+
+        // Parse the content of the message in JSON format => event
+        ObjectMapper mapper = new ObjectMapper();
+        JsonFactory factory = mapper.getFactory();
+        JsonParser parser = factory.createParser(json);
+        JsonNode event = mapper.readTree(parser);
+
+        // Take a snapshot of the listeners
+        List<RestPushCenterListener> listenersSnapshot = null;
+        synchronized (listeners) {
+            listenersSnapshot = new ArrayList<>(listeners);
+        }
+
+        // Notify the listeners
+        for (RestPushCenterListener listener : listenersSnapshot) {
+            listener.onEvent(event);
         }
     }
 }
