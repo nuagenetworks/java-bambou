@@ -1,4 +1,4 @@
-package net.nuagenetworks.bambou;
+package net.nuagenetworks.bambou.jms;
 
 import java.util.Properties;
 
@@ -13,20 +13,23 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
+import net.nuagenetworks.bambou.RestException;
 
-    private final static String JNDI_FACTORY = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
-    private final static String JMS_FACTORY = "ConnectionFactory";
-    private final static String JMS_USER = "csproot@csp";
-    private final static String JMS_PASSWORD = "csproot";
-    private final static String PROVIDER_URL_FMT = "tcp://%s:%d?wireFormat.cacheEnabled=false&wireFormat.tightEncodingEnabled=false";
-    private final static int JMS_PORT = 61616;
+public class RestPushCenterJmsJBoss extends RestPushCenterJms {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsActiveMQ.class);
+    private final static String JNDI_FACTORY = "org.jboss.naming.remote.client.InitialContextFactory";
+    private final static String JMS_FACTORY = "jms/RemoteConnectionFactory";
+    private final static String JNDI_USER = "vsduser";
+    private final static String JNDI_PASSWORD = "vsdpass";
+    private final static String JMS_USER = "jmsuser@system";
+    private final static String JMS_PASSWORD = "jmspass";
+    private final static int JMS_PORT = 4447;
+
+    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsJBoss.class);
 
     private InitialContext context;
 
-    protected RestPushCenterJmsActiveMQ() {
+    public RestPushCenterJmsJBoss() {
         jmsHost = null;
         jmsPort = JMS_PORT;
         jmsUser = JMS_USER;
@@ -36,17 +39,22 @@ public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
 
     public synchronized void start() throws RestException {
         try {
-            String jndiProviderUrl = String.format(PROVIDER_URL_FMT, jmsHost, jmsPort);
+            String jndiProviderUrl = "remote://" + jmsHost + ":" + jmsPort;
             String jndiFactory = JNDI_FACTORY;
+            String jndiUser = JNDI_USER;
+            String jndiPassword = JNDI_PASSWORD;
             String jmsFactory = JMS_FACTORY;
 
             // Debug
-            logger.debug("Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory);
+            logger.debug(
+                    "Creating JNDI connection to: " + jndiProviderUrl + " using factory: " + jndiFactory + " user: " + jndiUser + " passwd: " + jndiPassword);
 
             // Initialize JNDI connection
             Properties env = new Properties();
             env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
             env.put(Context.PROVIDER_URL, jndiProviderUrl);
+            env.put(Context.SECURITY_PRINCIPAL, jndiUser);
+            env.put(Context.SECURITY_CREDENTIALS, jndiPassword);
             context = new InitialContext(env);
 
             // Debug

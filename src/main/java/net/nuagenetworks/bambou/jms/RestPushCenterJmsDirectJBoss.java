@@ -1,4 +1,4 @@
-package net.nuagenetworks.bambou;
+package net.nuagenetworks.bambou.jms;
 
 import java.util.HashMap;
 
@@ -12,7 +12,9 @@ import org.hornetq.jms.client.HornetQTopicConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
+import net.nuagenetworks.bambou.RestException;
+
+public class RestPushCenterJmsDirectJBoss extends RestPushCenterJms {
 
     private final static String JMS_USER = "jmsuser@system";
     private final static String JMS_PASSWORD = "jmspass";
@@ -23,7 +25,7 @@ public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
     private final static int NETTY_DEFAULT_RETRY_INTERVAL = 10000;
     private final static int NETTY_DEFAULT_MAX_RETRY_INTERVAL = 60000;
 
-    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsJBossDirect.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsDirectJBoss.class);
 
     private boolean haMode;
     private Object waitObj = new Object();
@@ -32,7 +34,7 @@ public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
         this.haMode = haMode;
     }
 
-    protected RestPushCenterJmsJBossDirect() {
+    public RestPushCenterJmsDirectJBoss() {
         jmsHost = null;
         jmsPort = DEFAULT_MESSAGING_PORT;
         jmsUser = JMS_USER;
@@ -70,8 +72,8 @@ public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
                 logger.debug("Subscribing to JMS topic: " + jmsTopic);
 
                 // Create the subscriber
-                String[] topicName = jmsTopic.split("/");
                 TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
+                String[] topicName = jmsTopic.split("/");
                 Topic topic = topicSession.createTopic(topicName[topicName.length - 1]);
                 createSubscriber(topicSession, topic);
 

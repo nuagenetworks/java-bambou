@@ -1,4 +1,4 @@
-package net.nuagenetworks.bambou;
+package net.nuagenetworks.bambou.jms;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,6 +21,9 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.nuagenetworks.bambou.RestPushCenter;
+import net.nuagenetworks.bambou.RestPushCenterListener;
 
 public abstract class RestPushCenterJms implements RestPushCenter {
 

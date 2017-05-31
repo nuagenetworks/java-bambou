@@ -37,6 +37,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import net.nuagenetworks.bambou.jms.RestPushCenterJmsActiveMQ;
+import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectActiveMQ;
+import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectJBoss;
+import net.nuagenetworks.bambou.jms.RestPushCenterJmsJBoss;
 import net.nuagenetworks.bambou.operation.RestSessionOperations;
 import net.nuagenetworks.bambou.service.RestClientService;
 
@@ -190,7 +194,20 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
                 pushCenter = new RestPushCenterJmsJBoss();
             }
         } else if (pushCenterType == RestPushCenterType.JMS_DIRECT) {
-            pushCenter = new RestPushCenterJmsJBossDirect();
+            if (version >= 5.0) {
+                // VSD version 5.0.x uses a different JMS client than previous
+                // releases
+                RestPushCenterJmsDirectActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsDirectActiveMQ();
+                if (username != null && password != null && enterprise != null) {
+                    String jmsUser = username + "@" + enterprise;
+                    String jmsPassword = password;
+                    pushCenterJmsActiveMQ.setUser(jmsUser);
+                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
+                }
+                pushCenter = pushCenterJmsActiveMQ;
+            } else {
+                pushCenter = new RestPushCenterJmsDirectJBoss();
+            }
         } else {
             pushCenter = new RestPushCenterLongPoll(this);
         }

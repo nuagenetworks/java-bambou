@@ -1,7 +1,5 @@
 package net.nuagenetworks.bambou;
 
 public enum RestPushCenterType {
-    LONG_POLL, // REST
-    JMS, // JMS
-    JMS_DIRECT // JMS - no JNDI
+    LONG_POLL, JMS, JMS_NO_JNDI
 };
