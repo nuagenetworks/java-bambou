@@ -48,8 +48,9 @@ public class RestPushCenterJmsDirectActiveMQ extends RestPushCenterJms {
 
             // Create the subscriber
             TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-            String[] topicName = jmsTopic.split("/");
-            Topic topic = topicSession.createTopic(topicName[topicName.length - 2] + '/' + topicName[topicName.length - 1]);
+            String[] topicSubNames = jmsTopic.split("/");
+            String topicName = topicSubNames[topicSubNames.length - 2] + '/' + topicSubNames[topicSubNames.length - 1];
+            Topic topic = topicSession.createTopic(topicName);
             createSubscriber(topicSession, topic);
 
             // Debug
