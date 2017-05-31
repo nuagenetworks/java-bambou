@@ -142,28 +142,29 @@ public class RestClientService {
                             JsonNode descriptionNode = descriptionBlockNode.get("description");
                             if (descriptionNode != null) {
                                 errorMessage = descriptionNode.asText();
-                            }                        
+                            }
                             JsonNode propertyNode = error.get("property");
                             if (propertyNode != null) {
                                 errorMessage = propertyNode.asText() + ": " + errorMessage;
                             }
                         }
                     }
-                    
+
                     // Set a default error message if not already set
                     if (errorMessage == null) {
                         errorMessage = statusCode + " " + statusCode.getReasonPhrase();
                     }
-                    
-                    // Try to retrieve an error code from the response 
+
+                    // Try to retrieve an error code from the response
                     // content (in JSON format)
                     String internalErrorCode = null;
                     JsonNode internalErrorCodeNode = responseObj.get("internalErrorCode");
                     if (internalErrorCodeNode != null) {
                         internalErrorCode = internalErrorCodeNode.asText();
                     }
-                    
-                    // Raise an exception with status code, description and internal error code
+
+                    // Raise an exception with status code, description and
+                    // internal error code
                     throw new RestStatusCodeException(statusCode, errorMessage, internalErrorCode);
                 } catch (JsonParseException | JsonMappingException ex) {
                     // No error message available in the response

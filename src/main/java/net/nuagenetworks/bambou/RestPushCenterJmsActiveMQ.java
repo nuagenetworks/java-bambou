@@ -23,7 +23,7 @@ public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
     private final static int JMS_PORT = 61616;
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsActiveMQ.class);
-    
+
     private InitialContext context;
 
     protected RestPushCenterJmsActiveMQ() {
@@ -33,7 +33,7 @@ public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
         jmsPassword = JMS_PASSWORD;
         jmsTopic = JMS_TOPIC;
     }
-    
+
     public synchronized void start() throws RestException {
         try {
             String jndiProviderUrl = String.format(PROVIDER_URL_FMT, jmsHost, jmsPort);
@@ -71,7 +71,7 @@ public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
             throw new RestException(ex);
         }
     }
-    
+
     public synchronized void stop() {
         try {
             // Close JNDI
@@ -81,7 +81,7 @@ public class RestPushCenterJmsActiveMQ extends RestPushCenterJms {
 
             super.stop();
         } catch (NamingException ex) {
-            logger.error("Error" , ex);
+            logger.error("Error", ex);
         }
     }
 }

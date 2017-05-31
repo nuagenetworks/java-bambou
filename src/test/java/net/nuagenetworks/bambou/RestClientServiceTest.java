@@ -134,7 +134,8 @@ public class RestClientServiceTest {
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
         EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }", HttpStatus.NOT_FOUND));
+                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",
+                        HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {
@@ -159,7 +160,9 @@ public class RestClientServiceTest {
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
         EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }", HttpStatus.NOT_FOUND));
+                .andReturn(new ResponseEntity<String>(
+                        "{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",
+                        HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {

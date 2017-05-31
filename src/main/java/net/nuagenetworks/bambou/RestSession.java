@@ -176,7 +176,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
         if (pushCenterType == RestPushCenterType.JMS) {
             if (version >= 5.0) {
-                // VSD version 5.0.x uses a different JMS client than previous releases
+                // VSD version 5.0.x uses a different JMS client than previous
+                // releases
                 RestPushCenterJmsActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsActiveMQ();
                 if (username != null && password != null && enterprise != null) {
                     String jmsUser = username + "@" + enterprise;

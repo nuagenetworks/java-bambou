@@ -97,7 +97,7 @@ public class RestPushCenterLongPoll implements RestPushCenter {
 
         // Polling is now running
         isRunning = true;
-        
+
         // Debug
         logger.info("Polling running");
     }

@@ -34,7 +34,7 @@ public class RestStatusCodeException extends RestException {
 
     private HttpStatus statusCode;
     private String internalErrorCode;
-    
+
     public RestStatusCodeException(HttpStatus statusCode, String message, String internalErrorCode) {
         super(message);
 
@@ -55,7 +55,7 @@ public class RestStatusCodeException extends RestException {
     public HttpStatus getStatusCode() {
         return statusCode;
     }
-    
+
     public String getInternalErrorCode() {
         return internalErrorCode;
     }

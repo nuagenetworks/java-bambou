@@ -24,7 +24,7 @@ public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
     private final static int NETTY_DEFAULT_MAX_RETRY_INTERVAL = 60000;
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsJBossDirect.class);
-    
+
     private boolean haMode;
     private Object waitObj = new Object();
 
@@ -40,7 +40,7 @@ public class RestPushCenterJmsJBossDirect extends RestPushCenterJms {
         jmsTopic = JMS_TOPIC;
         haMode = false;
     }
-    
+
     public void start() throws RestException {
         synchronized (this) {
             try {

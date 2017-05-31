@@ -24,7 +24,7 @@ public class RestPushCenterJmsJBoss extends RestPushCenterJms {
     private final static int JMS_PORT = 4447;
 
     private static final Logger logger = LoggerFactory.getLogger(RestPushCenterJmsJBoss.class);
-    
+
     private InitialContext context;
 
     protected RestPushCenterJmsJBoss() {
@@ -34,7 +34,7 @@ public class RestPushCenterJmsJBoss extends RestPushCenterJms {
         jmsPassword = JMS_PASSWORD;
         jmsTopic = JMS_TOPIC;
     }
-    
+
     public synchronized void start() throws RestException {
         try {
             String jndiProviderUrl = "remote://" + jmsHost + ":" + jmsPort;
@@ -70,14 +70,14 @@ public class RestPushCenterJmsJBoss extends RestPushCenterJms {
             Topic topic = (Topic) context.lookup(jmsTopic);
             TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
             createSubscriber(topicSession, topic);
-            
+
             // Debug
             logger.info("JMS connection started");
         } catch (NamingException | JMSException ex) {
             throw new RestException(ex);
         }
     }
-    
+
     public synchronized void stop() {
         try {
             // Close JNDI
@@ -87,7 +87,7 @@ public class RestPushCenterJmsJBoss extends RestPushCenterJms {
 
             super.stop();
         } catch (NamingException ex) {
-            logger.error("Error" , ex);
+            logger.error("Error", ex);
         }
     }
 }

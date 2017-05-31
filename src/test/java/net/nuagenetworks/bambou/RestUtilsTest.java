@@ -46,7 +46,7 @@ import net.nuagenetworks.bambou.spring.TestSpringConfig;
 public class RestUtilsTest {
 
     @Test
-    public void testCreateRestObjectWithContent() throws RestException, JsonProcessingException, IOException {        
+    public void testCreateRestObjectWithContent() throws RestException, JsonProcessingException, IOException {
         JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
         ObjectNode restObjNode = nodeFactory.objectNode();
         restObjNode.put("ID", "123");
@@ -55,8 +55,8 @@ public class RestUtilsTest {
         restObjNode.put("creationDate", "34567");
         restObjNode.put("lastUpdatedDate", "123456");
         restObjNode.put("owner", "MyOwner");
-        RestObject restObj = RestUtils.createRestObjectWithContent(RestObject.class, restObjNode);        
-        Assert.assertEquals("123", restObj.getId()); 
+        RestObject restObj = RestUtils.createRestObjectWithContent(RestObject.class, restObjNode);
+        Assert.assertEquals("123", restObj.getId());
         Assert.assertEquals("456", restObj.getParentId());
         Assert.assertEquals("MyParentType", restObj.getParentType());
         Assert.assertEquals("34567", restObj.getCreationDate());
