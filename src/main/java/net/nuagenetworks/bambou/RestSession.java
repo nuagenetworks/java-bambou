@@ -193,7 +193,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
             } else {
                 pushCenter = new RestPushCenterJmsJBoss();
             }
-        } else if (pushCenterType == RestPushCenterType.JMS_DIRECT) {
+        } else if (pushCenterType == RestPushCenterType.JMS_NO_JNDI) {
             if (version >= 5.0) {
                 // VSD version 5.0.x uses a different JMS client than previous
                 // releases
