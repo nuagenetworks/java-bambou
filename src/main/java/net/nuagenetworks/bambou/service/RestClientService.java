@@ -29,6 +29,7 @@ package net.nuagenetworks.bambou.service;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.net.HttpRetryException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -47,6 +48,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -114,7 +116,18 @@ public class RestClientService {
     }
 
     private <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String uri, HttpEntity<U> content, Class<T> responseType) throws RestException {
-        ResponseEntity<String> response = restOperations.exchange(uri, method, content, String.class);
+        ResponseEntity<String> response = null;
+        try {
+            response = restOperations.exchange(uri, method, content, String.class);
+        } catch (ResourceAccessException e) {
+            if (e.getCause() instanceof HttpRetryException) {
+                logger.info("Got HttpRetryException");
+                HttpRetryException retryException = (HttpRetryException)e.getCause();
+                throw new RestStatusCodeException(HttpStatus.valueOf(retryException.responseCode()), retryException.getReason(), retryException.getReason());
+            }
+            throw e;
+        }
+
         String responseBody = response.getBody();
         HttpStatus statusCode = response.getStatusCode();
         ObjectMapper objectMapper = new ObjectMapper();
