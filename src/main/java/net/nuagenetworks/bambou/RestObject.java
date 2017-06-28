@@ -212,15 +212,20 @@ public class RestObject implements RestObjectOperations, Serializable {
     }
 
     @Override
-    public void assign(List<? extends RestObject> childRestObjs) throws RestException {
+    public void assign(List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
         if (session != null) {
-            session.assign(this, childRestObjs);
+            session.assign(this, childRestObjs, objectType);
         } else {
             throw new RestException("Session not available in current thread");
         }
     }
 
+    @Override
+    public void assign(List<? extends RestObject> childRestObjs) throws RestException {
+        assign(childRestObjs, null);
+    }
+    
     @Override
     public void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
@@ -334,10 +339,21 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     @Override
     public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
+        assign(session, childRestObjs, null, commit);
+    }
+    
+    @Override
+    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException {
+        assign(session, childRestObjs, objectType, true);
+    }
+    
+    @Override
+    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType, boolean commit) throws RestException {
         // Make sure there are child objects passed in
-        if (childRestObjs.isEmpty()) {
+        if (childRestObjs.isEmpty() && objectType == null) {
             throw new RestException("No child objects specified");
         }
+        
 
         // Extract IDs from the specified child objects
         List<String> ids = new ArrayList<String>();
@@ -345,7 +361,7 @@ public class RestObject implements RestObjectOperations, Serializable {
             ids.add(restObject.getId());
         }
 
-        Class<?> childRestObjClass = childRestObjs.get(0).getClass();
+        Class<?> childRestObjClass = objectType == null ? childRestObjs.get(0).getClass() : objectType;
         ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, childRestObjClass), null, null,
                 ids, BambouUtils.getArrayClass(this));
         if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {

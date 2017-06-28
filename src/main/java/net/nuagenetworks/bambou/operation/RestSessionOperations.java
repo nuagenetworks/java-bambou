@@ -59,6 +59,8 @@ public interface RestSessionOperations {
     void assign(RestObject restObj, List<? extends RestObject> childRestObjs) throws RestException;
 
     void assign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
+    
+    void assign(RestObject restObj, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException;
 
     <T extends RestObject> List<T> get(RestFetcher<T> fetcher) throws RestException;
 

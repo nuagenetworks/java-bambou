@@ -266,9 +266,14 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     @Override
     public void assign(RestObject restObj, List<? extends RestObject> childRestObjs) throws RestException {
-        restObj.assign(this, childRestObjs);
+        assign(restObj, childRestObjs, null);
     }
 
+    @Override
+    public void assign(RestObject restObj, List<? extends RestObject> childRestObjs, Class<? extends RestObject> objectType) throws RestException {
+        restObj.assign(this, childRestObjs, objectType);
+    }
+    
     @Override
     public void assign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
         restObj.assign(this, childRestObjs, commit);
