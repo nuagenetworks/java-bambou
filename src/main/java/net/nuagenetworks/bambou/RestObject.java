@@ -334,11 +334,7 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     @Override
     public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
-        // Make sure there are child objects passed in
-        if (childRestObjs.isEmpty()) {
-            throw new RestException("No child objects specified");
-        }
-
+        
         // Extract IDs from the specified child objects
         List<String> ids = new ArrayList<String>();
         for (RestObject restObject : childRestObjs) {
