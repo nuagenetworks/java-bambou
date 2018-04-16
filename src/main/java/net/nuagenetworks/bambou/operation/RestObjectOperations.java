@@ -55,6 +55,7 @@ public interface RestObjectOperations {
     void assign(List<? extends RestObject> childRestObjs) throws RestException;
 
     void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
+    
 
     void fetch(RestSession<?> session) throws RestException;
 
@@ -78,4 +79,6 @@ public interface RestObjectOperations {
     void assign(RestSession<?> session, List<? extends RestObject> childRestObjs) throws RestException;
 
     void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
+    
+    void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, boolean commit) throws RestException;
 }

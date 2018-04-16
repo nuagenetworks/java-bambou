@@ -351,6 +351,25 @@ public class RestObjectTest {
         // Verify mock calls
         EasyMock.verify(restOperations);
     }
+    
+    @Test
+    public void testUnassignAllObjects() throws RestException, RestClientException, JsonProcessingException {
+    	String id = "12345";
+
+        // Create object
+        TestObject object = new TestObject();
+        object.setId(id);
+        
+
+        // Start session
+        startSession(restOperations, "object/" + id + "/childobject", HttpMethod.PUT, HttpStatus.OK, mapper.writeValueAsString(Arrays.asList(object)));
+
+        // Assign child objects
+        object.unassignAll(session, TestChildObject.class, true);
+
+        // Verify mock calls
+        EasyMock.verify(restOperations);
+    }
 
     @Test
     public void testFetchObjectWith401Response() throws RestException, RestClientException, JsonProcessingException {

@@ -335,9 +335,9 @@ public class RestObject implements RestObjectOperations, Serializable {
     @Override
     public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
     	
-    	// Make sure the child objects passed in is not null     
-    	if (childRestObjs == null) {	
-    		throw new RestException("Child objects was null.");	
+    	// Make sure the child objects passed in is not null or empty
+    	if (childRestObjs == null || childRestObjs.size() == 0) {	
+    		throw new RestException("Child objects was null or empty.");	
     	}
         
         // Extract IDs from the specified child objects
@@ -364,7 +364,33 @@ public class RestObject implements RestObjectOperations, Serializable {
         }
     }
 
-    @JsonIgnore
+	@Override
+	public void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, boolean commit)
+			throws RestException {
+		// Make sure the objectType is not null
+    	if (objectType == null) {	
+    		throw new RestException("Object type was null.");	
+    	}
+        
+        // Dummy list of ids, as we are unassigning all from the parent
+        List<String> ids = new ArrayList<String>();
+        
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, objectType), null, null,
+                ids, BambouUtils.getArrayClass(this));
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
+            // Success
+
+            if (commit) {
+                removeChildren(objectType);
+            }
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+		
+	}
+
+	@JsonIgnore
     public String getRestName() {
         return getRestName(getClass());
     }
@@ -389,6 +415,20 @@ public class RestObject implements RestObjectOperations, Serializable {
         if (!children.contains(childRestObj)) {
             children.add(childRestObj);
         }
+    }
+    
+    private void removeChildren(Class<? extends RestObject> objectType) throws RestException {
+    	// Get the object's resource name
+        String restName = getRestName(objectType);
+
+        // Add child object to registered fetcher for child type
+        @SuppressWarnings("unchecked")
+        RestFetcher<RestObject> children = (RestFetcher<RestObject>) fetcherRegistry.get(restName);
+        if (children == null) {
+            throw new RestException(String.format("Could not find fetcher with name %s while removing children %s in parent %s", restName, objectType, this));
+        }
+
+        children.clear();
     }
 
     @JsonIgnore
