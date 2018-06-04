@@ -115,6 +115,13 @@ public class RestClientService {
         return response;
     }
 
+    public String sendRawRequest(HttpMethod method, String uri) {
+        ResponseEntity<String> response = null;
+        response = restOperations.exchange(uri, method, null, String.class);
+
+        return response.getBody();
+    }    
+
     private <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String uri, HttpEntity<U> content, Class<T> responseType) throws RestException {
         ResponseEntity<String> response = null;
         try {

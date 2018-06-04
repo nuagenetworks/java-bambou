@@ -27,6 +27,8 @@
 package net.nuagenetworks.bambou;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -145,6 +147,17 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     public R getRootObject() {
         return restRootObj;
+    }
+
+    public String getVSDVersion() {
+        String response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/Resources/app-version.js");
+        Pattern r = Pattern.compile("APP_BUILDVERSION='(.*)'");    
+        Matcher m = r.matcher(response);
+        if (m.find()) {
+            return m.group(1);
+        } else {
+            return "";
+        }
     }
 
     @Override
