@@ -31,11 +31,14 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -44,7 +47,7 @@ import net.nuagenetworks.bambou.spring.TestSpringConfig;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestSpringConfig.class, loader = AnnotationConfigContextLoader.class)
 public class RestUtilsTest {
-
+	private static final Logger logger = LoggerFactory.getLogger(RestUtilsTest.class);
     @Test
     public void testCreateRestObjectWithContent() throws RestException, JsonProcessingException, IOException {
         JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
@@ -62,5 +65,43 @@ public class RestUtilsTest {
         Assert.assertEquals("34567", restObj.getCreationDate());
         Assert.assertEquals("123456", restObj.getLastUpdatedDate());
         Assert.assertEquals("MyOwner", restObj.getOwner());
+    }
+    
+    @Test
+    public void testToString() throws RestException {
+    	RestObject object = new RestObject();
+    	object.setId("123");
+    	object.setParentId("456");
+    	object.setParentType("MyParentType");
+    	object.setCreationDate("34567");
+    	object.setLastUpdatedDate("123456");
+    	object.setOwner("MyOwner");
+    	
+    	String content = RestUtils.toString(object);
+    	JsonNode node = RestUtils.toJson(content);
+    	
+    	Assert.assertEquals("123", node.get("ID").asText());
+        Assert.assertEquals("456", node.get("parentID").asText());
+        Assert.assertEquals("MyParentType", node.get("parentType").asText());
+        Assert.assertEquals("34567", node.get("creationDate").asText());
+        Assert.assertEquals("123456", node.get("lastUpdatedDate").asText());
+        Assert.assertEquals("MyOwner", node.get("owner").asText());
+    }
+    
+    @Test
+    public void testToJson() throws RestException {
+    	
+    	JsonNode object = RestUtils.toJson("{ \"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 42}");
+    	JsonNode text = RestUtils.toJson("Hello World!");
+    	JsonNode empty = RestUtils.toJson("");
+    	JsonNode space = RestUtils.toJson(" ");
+    	
+    	Assert.assertEquals("John", object.get("firstName").asText());
+    	Assert.assertEquals("Smith", object.get("lastName").asText());
+    	Assert.assertEquals(42, object.get("age").asInt());
+    	
+    	Assert.assertEquals("Hello World!", text.asText());
+    	Assert.assertEquals("", empty.asText());
+    	Assert.assertEquals(" ", space.asText());
     }
 }
