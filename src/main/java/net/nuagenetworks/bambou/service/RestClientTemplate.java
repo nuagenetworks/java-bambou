@@ -29,8 +29,14 @@ package net.nuagenetworks.bambou.service;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 public class RestClientTemplate extends RestTemplate {
@@ -43,6 +49,23 @@ public class RestClientTemplate extends RestTemplate {
         setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
+        
+        // [NVNSP-6083] add support for all media types to the jackson http message converter.
+        List<HttpMessageConverter<?>> converters = getMessageConverters();
+        
+        if(!CollectionUtils.isEmpty(converters)) {
+        	
+        	for(HttpMessageConverter<?> converter: converters) {
+        		
+        		if(converter instanceof MappingJackson2HttpMessageConverter) {
+        			List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
+        			supportedMediaTypes.add(MediaType.ALL);
+        			((MappingJackson2HttpMessageConverter) converter).setSupportedMediaTypes(supportedMediaTypes);
+        		}
+        		
+        	}
+        	
+        }
     }
 
     public void setSocketTimeout(int socketTimeout) {

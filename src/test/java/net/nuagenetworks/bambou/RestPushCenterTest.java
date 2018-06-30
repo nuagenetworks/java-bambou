@@ -42,14 +42,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.nuagenetworks.bambou.RestSession;
 import net.nuagenetworks.bambou.model.Events;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
 import net.nuagenetworks.bambou.testobj.TestRootObject;
