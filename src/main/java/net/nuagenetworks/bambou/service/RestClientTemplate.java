@@ -43,6 +43,7 @@ public class RestClientTemplate extends RestTemplate {
         setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
+        
     }
 
     public void setSocketTimeout(int socketTimeout) {
