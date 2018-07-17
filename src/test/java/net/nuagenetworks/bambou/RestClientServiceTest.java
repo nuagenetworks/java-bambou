@@ -161,15 +161,12 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-<<<<<<< HEAD
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",HttpStatus.NOT_FOUND));
-=======
+        
         EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
                 .andReturn(new ResponseEntity<JsonNode>(
                         RestUtils.toJson("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }"),
                         HttpStatus.NOT_FOUND));
->>>>>>> 3f98eb4... Issue #10: RestClientService: Regional Special Characters Being Garbled
+        
         EasyMock.replay(restOperations);
 
         try {

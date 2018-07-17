@@ -50,8 +50,6 @@ public class RestClientTemplate extends RestTemplate {
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
         
-<<<<<<< HEAD
-=======
         // [NVNSP-6083] add support for all media types to the jackson http message converter.
         List<HttpMessageConverter<?>> converters = getMessageConverters();
         
@@ -68,7 +66,6 @@ public class RestClientTemplate extends RestTemplate {
         	}
         	
         }
->>>>>>> 085979b... Issue #13:
     }
 
     public void setSocketTimeout(int socketTimeout) {
