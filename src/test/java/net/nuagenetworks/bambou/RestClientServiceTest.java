@@ -41,6 +41,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.client.RestOperations;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import net.nuagenetworks.bambou.RestException;
 import net.nuagenetworks.bambou.service.RestClientService;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
@@ -63,8 +65,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>(HttpStatus.OK));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
+                .andReturn(new ResponseEntity<JsonNode>(HttpStatus.OK));
         EasyMock.replay(restOperations);
 
         ResponseEntity<String> response = restService.sendRequest(method, url, null, content, String.class);
@@ -83,8 +85,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("", HttpStatus.NOT_FOUND));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
+                .andReturn(new ResponseEntity<JsonNode>(RestUtils.toJson(""), HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {
@@ -93,7 +95,7 @@ public class RestClientServiceTest {
         } catch (RestStatusCodeException ex) {
             // Expect exception
             Assert.assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-            Assert.assertEquals("404/Not Found", ex.getMessage());
+            Assert.assertEquals("404 Not Found", ex.getMessage());
             Assert.assertNull(ex.getInternalErrorCode());
         }
 
@@ -108,8 +110,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{ \"internalErrorCode\": \"1001\" }", HttpStatus.NOT_FOUND));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
+                .andReturn(new ResponseEntity<JsonNode>(RestUtils.toJson("{ \"internalErrorCode\": \"1001\" }"), HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {
@@ -133,8 +135,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
+                .andReturn(new ResponseEntity<JsonNode>(RestUtils.toJson("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }"),
                         HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
@@ -159,8 +161,12 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",HttpStatus.NOT_FOUND));
+        
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
+                .andReturn(new ResponseEntity<JsonNode>(
+                        RestUtils.toJson("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }"),
+                        HttpStatus.NOT_FOUND));
+        
         EasyMock.replay(restOperations);
 
         try {
