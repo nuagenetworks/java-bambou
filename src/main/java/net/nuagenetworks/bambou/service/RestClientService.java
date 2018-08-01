@@ -125,13 +125,24 @@ public class RestClientService {
         ResponseEntity<JsonNode> response = null;
         try {
             response = restOperations.exchange(uri, method, content, JsonNode.class);
-        } catch (ResourceAccessException e) {
+        } 
+        catch (ResourceAccessException e) {
             if (e.getCause() instanceof HttpRetryException) {
                 logger.info("Got HttpRetryException");
                 HttpRetryException retryException = (HttpRetryException)e.getCause();
                 throw new RestStatusCodeException(HttpStatus.valueOf(retryException.responseCode()), retryException.getReason(), retryException.getReason());
             }
             throw e;
+        }
+        catch (RestClientException e) {
+        	String errorMsg = e.getMessage();
+        	if(errorMsg != null) {
+        		if(errorMsg.contains("JsonNode")) {
+        			logger.info("Got JsonParseException");
+        			throw new RestStatusCodeException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, errorMsg, errorMsg);
+        		}
+        	}
+        	throw e;
         }
 
         JsonNode responseBody = response.getBody();
