@@ -161,10 +161,12 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
+        
         EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class)))
                 .andReturn(new ResponseEntity<JsonNode>(
                         RestUtils.toJson("{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }"),
                         HttpStatus.NOT_FOUND));
+        
         EasyMock.replay(restOperations);
 
         try {
