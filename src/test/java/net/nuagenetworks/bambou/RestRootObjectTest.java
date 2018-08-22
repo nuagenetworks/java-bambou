@@ -46,7 +46,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.nuagenetworks.bambou.RestException;
@@ -139,9 +138,9 @@ public class RestRootObjectTest {
         // Expected REST calls
         EasyMock.reset(restOperations);
         EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/root"), EasyMock.eq(HttpMethod.GET),
-                EasyMock.anyObject(HttpEntity.class), EasyMock.eq(JsonNode.class))).andReturn(new ResponseEntity<JsonNode>(RestUtils.toJson("[{}]"), HttpStatus.OK));
+                EasyMock.anyObject(HttpEntity.class), EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>("[{}]", HttpStatus.OK));
         EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/" + urlSuffix), EasyMock.eq(method),
-                EasyMock.capture(capturedHttpEntity), EasyMock.eq(JsonNode.class))).andReturn(new ResponseEntity<JsonNode>(RestUtils.toJson(responseString), responseStatus));
+                EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>(responseString, responseStatus));
         EasyMock.replay(restOperations);
 
         // Start REST session
