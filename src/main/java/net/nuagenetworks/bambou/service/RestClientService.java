@@ -27,9 +27,9 @@
 package net.nuagenetworks.bambou.service;
 
 import java.io.IOException;
-import java.net.HttpRetryException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.net.HttpRetryException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -46,17 +46,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.ResourceAccessException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import net.nuagenetworks.bambou.RestException;
 import net.nuagenetworks.bambou.RestStatusCodeException;
-import net.nuagenetworks.bambou.RestUtils;
 import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
 import net.nuagenetworks.bambou.ssl.NaiveHostnameVerifier;
 import net.nuagenetworks.bambou.ssl.X509NaiveTrustManager;
@@ -122,11 +123,10 @@ public class RestClientService {
     }    
 
     private <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String uri, HttpEntity<U> content, Class<T> responseType) throws RestException {
-        ResponseEntity<JsonNode> response = null;
+        ResponseEntity<String> response = null;
         try {
-            response = restOperations.exchange(uri, method, content, JsonNode.class);
-        } 
-        catch (ResourceAccessException e) {
+            response = restOperations.exchange(uri, method, content, String.class);
+        } catch (ResourceAccessException e) {
             if (e.getCause() instanceof HttpRetryException) {
                 logger.info("Got HttpRetryException");
                 HttpRetryException retryException = (HttpRetryException)e.getCause();
@@ -134,25 +134,15 @@ public class RestClientService {
             }
             throw e;
         }
-        catch (RestClientException e) {
-        	String errorMsg = e.getMessage();
-        	if(errorMsg != null) {
-        		if(errorMsg.contains("JsonNode")) {
-        			logger.info("Got JsonParseException");
-        			throw new RestStatusCodeException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, errorMsg, errorMsg);
-        		}
-        	}
-        	throw e;
-        }
 
-        JsonNode responseBody = response.getBody();
+        String responseBody = response.getBody();
         HttpStatus statusCode = response.getStatusCode();
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
             HttpStatus.Series series = statusCode.series();
             if (series != HttpStatus.Series.CLIENT_ERROR && series != HttpStatus.Series.SERVER_ERROR) {
-                T body = (responseBody != null) ? objectMapper.readValue(RestUtils.toString(responseBody), responseType) : null;
+                T body = (responseBody != null) ? objectMapper.readValue(responseBody, responseType) : null;
                 return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
             } else {
                 try {
@@ -162,8 +152,8 @@ public class RestClientService {
                     // Try to retrieve an error message from the response
                     // content (in JSON format)
                     String errorMessage = null;
-                    
-                    ArrayNode errorsNode = (ArrayNode) responseBody.get("errors");
+                    JsonNode responseObj = objectMapper.readTree(responseBody);
+                    ArrayNode errorsNode = (ArrayNode) responseObj.get("errors");
                     if (errorsNode != null && errorsNode.size() > 0) {
                         JsonNode error = errorsNode.get(0);
                         ArrayNode descriptionsNode = (ArrayNode) error.get("descriptions");
@@ -188,7 +178,7 @@ public class RestClientService {
                     // Try to retrieve an error code from the response
                     // content (in JSON format)
                     String internalErrorCode = null;
-                    JsonNode internalErrorCodeNode = responseBody.get("internalErrorCode");
+                    JsonNode internalErrorCodeNode = responseObj.get("internalErrorCode");
                     if (internalErrorCodeNode != null) {
                         internalErrorCode = internalErrorCodeNode.asText();
                     }
@@ -196,9 +186,7 @@ public class RestClientService {
                     // Raise an exception with status code, description and
                     // internal error code
                     throw new RestStatusCodeException(statusCode, errorMessage, internalErrorCode);
-                } catch(RestStatusCodeException ex) {
-                	throw ex;
-                } catch (Exception ex) {
+                } catch (JsonParseException | JsonMappingException ex) {
                     // No error message available in the response
                     switch (statusCode.series()) {
                     case CLIENT_ERROR:
