@@ -230,6 +230,17 @@ public class RestObject implements RestObjectOperations, Serializable {
             throw new RestException("Session not available in current thread");
         }
     }
+    
+    public void assign(List<? extends RestObject> childRestObjs, Integer responseChoice, boolean commit) throws RestException {
+        RestSession<?> session = RestSession.getCurrentSession();
+        if (session != null) {
+            session.assign(this, childRestObjs,responseChoice, commit);
+        } else {
+            throw new RestException("Session not available in current thread");
+        }
+    }
+    
+    
 
     protected void registerFetcher(RestFetcher<?> fetcher, String restName) {
         fetcherRegistry.put(restName, fetcher);
@@ -331,10 +342,16 @@ public class RestObject implements RestObjectOperations, Serializable {
     public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs) throws RestException {
         assign(session, childRestObjs, true);
     }
+    
+    @Override
+    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs ,boolean commit) throws RestException {
+        assign(session, childRestObjs, null,commit);
+    }
+    
 
     @Override
-    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
-    	
+    public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Integer responseChoice ,boolean commit) throws RestException {
+        String params = BambouUtils.getResponseChoiceParam(responseChoice);
     	// Make sure the child objects passed in is not null or empty
     	if (childRestObjs == null || childRestObjs.size() == 0) {	
     		throw new RestException("Child objects was null or empty.");	
@@ -347,7 +364,7 @@ public class RestObject implements RestObjectOperations, Serializable {
         }
 
         Class<?> childRestObjClass = childRestObjs.get(0).getClass();
-        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, childRestObjClass), null, null,
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, childRestObjClass), params, null,
                 ids, BambouUtils.getArrayClass(this));
         if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
             // Success
@@ -363,10 +380,17 @@ public class RestObject implements RestObjectOperations, Serializable {
             throw new RestException("Response received with status code: " + response.getStatusCode());
         }
     }
+    
+    @Override
+    public void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, boolean commit) throws RestException {
+        unassignAll(session, objectType, null,commit);
+    }
+
 
 	@Override
-	public void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, boolean commit)
+	public void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, Integer responseChoice, boolean commit)
 			throws RestException {
+	    String params = BambouUtils.getResponseChoiceParam(responseChoice);
 		// Make sure the objectType is not null
     	if (objectType == null) {	
     		throw new RestException("Object type was null.");	
@@ -375,7 +399,7 @@ public class RestObject implements RestObjectOperations, Serializable {
         // Dummy list of ids, as we are unassigning all from the parent
         List<String> ids = new ArrayList<String>();
         
-        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, objectType), null, null,
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForChildType(session, objectType), params, null,
                 ids, BambouUtils.getArrayClass(this));
         if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
             // Success

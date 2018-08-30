@@ -286,6 +286,10 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     public void assign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
         restObj.assign(this, childRestObjs, commit);
     }
+    @Override
+    public void assign(RestObject restObj, List<? extends RestObject> childRestObjs,Integer responseChoice, boolean commit) throws RestException {
+        restObj.assign(this, childRestObjs, responseChoice, commit);
+    }
 
     @Override
     public <T extends RestObject> List<T> get(RestFetcher<T> fetcher) throws RestException {
