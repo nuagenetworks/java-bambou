@@ -79,4 +79,6 @@ public interface RestSessionOperations {
 
     <T extends RestObject> int count(RestFetcher<T> fetcher, String filter, String orderBy, String[] groupBy, Integer page, Integer pageSize,
             String queryParameters, boolean commit) throws RestException;
+
+    void assign(RestObject restObj, List<? extends RestObject> childRestObjs, Integer responseChoice, boolean commit) throws RestException;
 }
