@@ -150,7 +150,11 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     public String getVSDVersion() {
-        String response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/Resources/app-version.js");
+        String response = null;
+        response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/architect/Resources/app-version.js");
+        if (response == null) response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/Resources/app-version.js");
+        if (response == null) return "";
+
         Pattern r = Pattern.compile("APP_BUILDVERSION='(.*)'");    
         Matcher m = r.matcher(response);
         if (m.find()) {

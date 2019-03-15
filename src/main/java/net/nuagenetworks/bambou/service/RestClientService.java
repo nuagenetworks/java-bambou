@@ -117,7 +117,13 @@ public class RestClientService {
 
     public String sendRawRequest(HttpMethod method, String uri) {
         ResponseEntity<String> response = null;
-        response = restOperations.exchange(uri, method, null, String.class);
+        try {
+            response = restOperations.exchange(uri, method, null, String.class);
+        } catch (Exception e) {
+            return null;
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()) return null;
 
         return response.getBody();
     }    
