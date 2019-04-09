@@ -141,7 +141,7 @@ public class RestClientService {
             throw e;
         }
 
-        String responseBody = new String(response.getBody());
+        String responseBody = response.getBody()==null?null:new String(response.getBody());
         HttpStatus statusCode = response.getStatusCode();
         ObjectMapper objectMapper = new ObjectMapper();
 

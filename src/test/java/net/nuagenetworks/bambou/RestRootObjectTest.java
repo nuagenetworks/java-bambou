@@ -138,9 +138,9 @@ public class RestRootObjectTest {
         // Expected REST calls
         EasyMock.reset(restOperations);
         EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/root"), EasyMock.eq(HttpMethod.GET),
-                EasyMock.anyObject(HttpEntity.class), EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>("[{}]", HttpStatus.OK));
+                EasyMock.anyObject(HttpEntity.class), EasyMock.eq(byte[].class))).andReturn(new ResponseEntity<byte[]>("[{}]".getBytes(), HttpStatus.OK));
         EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/" + urlSuffix), EasyMock.eq(method),
-                EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class))).andReturn(new ResponseEntity<String>(responseString, responseStatus));
+                EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class))).andReturn(new ResponseEntity<byte[]>(responseString.getBytes(), responseStatus));
         EasyMock.replay(restOperations);
 
         // Start REST session

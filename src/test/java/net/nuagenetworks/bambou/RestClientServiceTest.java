@@ -63,8 +63,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>(HttpStatus.OK));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
+                .andReturn(new ResponseEntity<byte[]>(HttpStatus.OK));
         EasyMock.replay(restOperations);
 
         ResponseEntity<String> response = restService.sendRequest(method, url, null, content, String.class);
@@ -83,8 +83,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("", HttpStatus.NOT_FOUND));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
+                .andReturn(new ResponseEntity<byte[]>("".getBytes(), HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {
@@ -108,8 +108,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{ \"internalErrorCode\": \"1001\" }", HttpStatus.NOT_FOUND));
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
+                .andReturn(new ResponseEntity<byte[]>("{ \"internalErrorCode\": \"1001\" }".getBytes(), HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
         try {
@@ -133,8 +133,8 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
+                .andReturn(new ResponseEntity<byte[]>("{\"errors\": [ { \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }".getBytes(),
                         HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
@@ -159,9 +159,9 @@ public class RestClientServiceTest {
 
         EasyMock.reset(restOperations);
         Capture<HttpEntity<?>> capturedHttpEntity = EasyMock.newCapture();
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(String.class)))
-                .andReturn(new ResponseEntity<String>(
-                        "{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }",
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(url), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
+                .andReturn(new ResponseEntity<byte[]>(
+                        "{\"errors\": [ { \"property\": \"My Property\", \"descriptions\": [ { \"description\": \"Error message\" } ] } ] }".getBytes(),
                         HttpStatus.NOT_FOUND));
         EasyMock.replay(restOperations);
 
