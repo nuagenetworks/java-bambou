@@ -129,9 +129,9 @@ public class RestClientService {
     }    
 
     private <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String uri, HttpEntity<U> content, Class<T> responseType) throws RestException {
-        ResponseEntity<String> response = null;
+        ResponseEntity<byte[]> response = null;
         try {
-            response = restOperations.exchange(uri, method, content, String.class);
+            response = restOperations.exchange(uri, method, content, byte[].class);
         } catch (ResourceAccessException e) {
             if (e.getCause() instanceof HttpRetryException) {
                 logger.info("Got HttpRetryException");
@@ -141,7 +141,7 @@ public class RestClientService {
             throw e;
         }
 
-        String responseBody = response.getBody();
+        String responseBody = new String(response.getBody());
         HttpStatus statusCode = response.getStatusCode();
         ObjectMapper objectMapper = new ObjectMapper();
 
