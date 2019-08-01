@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -152,18 +153,14 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     public String getVSDVersion() {
-        String response = null;
-        response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/architect/Resources/app-version.js");
-        if (response == null) response = restClientService.sendRawRequest(HttpMethod.GET,this.apiUrl+"/Resources/app-version.js");
-        if (response == null) return "";
-
-        Pattern r = Pattern.compile("APP_BUILDVERSION='(.*)'");    
-        Matcher m = r.matcher(response);
-        if (m.find()) {
-            return m.group(1);
-        } else {
-            return "";
+        try {
+            ResponseEntity<JsonNode> resp = restClientService.sendRequest(HttpMethod.GET,this.apiUrl+"/nuage",null,null,JsonNode.class);
+            JsonNode node = resp.getBody();
+            return node.get("vsdBuild").textValue();
+        } catch (Exception e) {
+            logger.error("Error: ",e);
         }
+        return null;
     }
 
     @Override
