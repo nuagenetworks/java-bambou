@@ -41,8 +41,9 @@ import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.nuagenetworks.bambou.annotation.RestEntity;
+import net.nuagenetworks.bambou.BulkResponse;
 import net.nuagenetworks.bambou.operation.RestObjectOperations;
 import net.nuagenetworks.bambou.util.BambouUtils;
 
@@ -192,6 +193,16 @@ public class RestObject implements RestObjectOperations, Serializable {
     }
 
     @Override
+    public <T extends RestObject> BulkResponse<T> createChildren(List<T> children) throws RestException {
+        RestSession<?> session = RestSession.getCurrentSession();
+        if (session != null) {
+            return session.createChildren(this, children);
+        } else {
+            throw new RestException("Session not available in current thread");
+        }
+    }
+
+    @Override
     public void instantiateChild(RestObject childRestObj, RestObject fromTemplate) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
         if (session != null) {
@@ -316,6 +327,29 @@ public class RestObject implements RestObjectOperations, Serializable {
             if (commit) {
                 addChild(childRestObj);
             }
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+    }
+
+    public <T extends RestObject> BulkResponse<T> createChildren(RestSession<?> session, List<T> children) throws RestException {
+        ResponseEntity<BulkResponse> response = session.sendRequestWithRetry(HttpMethod.POST, getResourceUrlForChildType(session, children.get(0).getClass()),
+                null, null, children, BulkResponse.class);
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL ) {
+            ObjectMapper mapper = new ObjectMapper();
+            BulkResponse<T> resp = response.getBody();
+            for (BulkResponse.ResponseItem item : resp.getResponse()) {
+                if (item.getStatus().startsWith("2")) {
+                    RestObject obj = item.getRestObject(children.get(0).getClass());
+                    RestObject target = children.get(item.getIndex());
+                    BambouUtils.copyJsonProperties(obj, target);
+                    addChild(target);
+                } else {
+                    logger.debug("Error creating bulk entity: "+item.getStatus());
+                }
+            }
+            return resp;
         } else {
             // Error
             throw new RestException("Response received with status code: " + response.getStatusCode());

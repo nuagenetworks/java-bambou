@@ -45,6 +45,8 @@ import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectJBoss;
 import net.nuagenetworks.bambou.jms.RestPushCenterJmsJBoss;
 import net.nuagenetworks.bambou.operation.RestSessionOperations;
 import net.nuagenetworks.bambou.service.RestClientService;
+import net.nuagenetworks.bambou.annotation.RestEntity;
+import net.nuagenetworks.bambou.util.BambouUtils;
 
 public class RestSession<R extends RestRootObject> implements RestSessionOperations {
 
@@ -236,6 +238,42 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     @Override
+    public <T extends RestObject> BulkResponse<T> bulkSave(List<T> objList) throws RestException {
+        String params = BambouUtils.getResponseChoiceParam(1);
+   
+        ResponseEntity<BulkResponse> response = this.sendRequestWithRetry(HttpMethod.PUT, getResourceUrlForParentType(objList.get(0).getClass()), params, null, objList, BulkResponse.class);
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
+            return response.getBody();
+            // Success
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+    }
+
+    @Override
+    public <T extends RestObject> BulkResponse<T> bulkDelete(List<T> objList) throws RestException {
+        String params = BambouUtils.getResponseChoiceParam(1);
+  
+        for (T item : objList) {
+            params += "&id="+item.getId();
+        } 
+        ResponseEntity<BulkResponse> response = this.sendRequestWithRetry(HttpMethod.DELETE, getResourceUrlForParentType(objList.get(0).getClass()), params, null, null, BulkResponse.class);
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
+            return response.getBody();
+            // Success
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+    }
+
+    @Override
+    public <T extends RestObject> BulkResponse<T> createChildren(RestObject parent, List<T> children) throws RestException {
+        return parent.createChildren(this,children);
+    }
+
+    @Override
     public void fetch(RestObject restObj) throws RestException {
         restObj.fetch(this);
     }
@@ -353,6 +391,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         headers.set(ORGANIZATION_HEADER, getEnterprise());
         headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
 
+        logger.info(url);
         try {
             return restClientService.sendRequest(method, url, headers, requestObj, responseType);
         } catch (RestStatusCodeException ex) {
@@ -382,7 +421,15 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     protected String getRestBaseUrl() {
-        return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(version).replace('.', '_'));
+        int roundedVersion = (int)version;
+        return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(roundedVersion));
+    }
+
+    protected String getResourceUrlForParentType(Class<?> parentRestObjClass) {
+        RestEntity annotation = parentRestObjClass.getAnnotation(RestEntity.class);
+        String parentResourceName = annotation.resourceName();
+
+        return String.format("%s/%s", getRestBaseUrl(), parentResourceName);
     }
 
     private synchronized void authenticate() throws RestException {

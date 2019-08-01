@@ -29,6 +29,7 @@ package net.nuagenetworks.bambou.operation;
 import java.util.List;
 
 import net.nuagenetworks.bambou.RestException;
+import net.nuagenetworks.bambou.BulkResponse;
 import net.nuagenetworks.bambou.RestObject;
 import net.nuagenetworks.bambou.RestSession;
 
@@ -58,6 +59,7 @@ public interface RestObjectOperations {
     
     void assign(List<? extends RestObject> childRestObjs,Integer responseChoice, boolean commit) throws RestException;
     
+    <T extends RestObject> BulkResponse<T> createChildren(List<T> children) throws RestException;
 
     void fetch(RestSession<?> session) throws RestException;
 
