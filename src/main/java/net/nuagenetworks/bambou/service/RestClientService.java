@@ -153,7 +153,7 @@ public class RestClientService {
             } else {
                 try {
                     // Debug
-                    logger.error("Response error: {} {} {}", statusCode, statusCode.getReasonPhrase(), responseBody);
+                    logger.debug("Response error: {} {} {}", statusCode, statusCode.getReasonPhrase(), responseBody);
 
                     // Try to retrieve an error message from the response
                     // content (in JSON format)
