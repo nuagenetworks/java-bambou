@@ -51,6 +51,7 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,6 +145,7 @@ public class RestClientService {
         String responseBody = response.getBody()==null?null:new String(response.getBody());
         HttpStatus statusCode = response.getStatusCode();
         ObjectMapper objectMapper = new ObjectMapper();
+	objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
 
         try {
             HttpStatus.Series series = statusCode.series();
