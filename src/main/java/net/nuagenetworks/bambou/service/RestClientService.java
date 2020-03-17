@@ -45,6 +45,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
@@ -131,15 +132,35 @@ public class RestClientService {
 
     private <T, U> ResponseEntity<T> sendRequest(HttpMethod method, String uri, HttpEntity<U> content, Class<T> responseType) throws RestException {
         ResponseEntity<byte[]> response = null;
-        try {
-            response = restOperations.exchange(uri, method, content, byte[].class);
-        } catch (ResourceAccessException e) {
-            if (e.getCause() instanceof HttpRetryException) {
-                logger.info("Got HttpRetryException");
-                HttpRetryException retryException = (HttpRetryException)e.getCause();
-                throw new RestStatusCodeException(HttpStatus.valueOf(retryException.responseCode()), retryException.getReason(), retryException.getReason());
+
+        // We must handle HEAD differently because we don't wanna parse the body.
+        // There is a bug in the VSD where the content-length is non-zero but no content is returned
+        if (method == HttpMethod.HEAD)
+        {
+            try {
+                ResponseEntity<?> r = restOperations.exchange(uri, method, content, (Class<?>)null);
+                HttpStatus statusCode = r.getStatusCode();
+                HttpStatus.Series series = statusCode.series();
+                if (series != HttpStatus.Series.CLIENT_ERROR && series != HttpStatus.Series.SERVER_ERROR) {
+                    return new ResponseEntity<T>(null, r.getHeaders(), r.getStatusCode());
+                }
+                throw new RestStatusCodeException(statusCode);
+            } catch (Exception e) {
+                throw e;
+           }
+        }
+        else
+        {
+            try {
+                response = restOperations.exchange(uri, method, content, byte[].class);
+            } catch (ResourceAccessException e) {
+                if (e.getCause() instanceof HttpRetryException) {
+                    logger.info("Got HttpRetryException");
+                    HttpRetryException retryException = (HttpRetryException)e.getCause();
+                    throw new RestStatusCodeException(HttpStatus.valueOf(retryException.responseCode()), retryException.getReason(), retryException.getReason());
+                }
+                throw e;
             }
-            throw e;
         }
 
         String responseBody = response.getBody()==null?null:new String(response.getBody());
