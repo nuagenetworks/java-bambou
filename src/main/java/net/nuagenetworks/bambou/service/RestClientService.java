@@ -181,6 +181,7 @@ public class RestClientService {
                     // Try to retrieve an error message from the response
                     // content (in JSON format)
                     String errorMessage = null;
+                    if (responseBody == null) throw new RestStatusCodeException(statusCode);
                     JsonNode responseObj = objectMapper.readTree(responseBody);
                     ArrayNode errorsNode = (ArrayNode) responseObj.get("errors");
                     if (errorsNode != null && errorsNode.size() > 0) {
