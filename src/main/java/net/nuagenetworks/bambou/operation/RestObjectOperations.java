@@ -53,6 +53,10 @@ public interface RestObjectOperations {
 
     void instantiateChild(RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit) throws RestException;
 
+    void unassign(List<? extends RestObject> childRestObjs) throws RestException;
+
+    void assignOne(RestObject childRestObj) throws RestException;
+
     void assign(List<? extends RestObject> childRestObjs) throws RestException;
 
     void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
@@ -89,4 +93,8 @@ public interface RestObjectOperations {
     void unassignAll(RestSession<?> session, Class<? extends RestObject> objectType, Integer responseChoice ,boolean commit) throws RestException;
 
     void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, Integer responseChoice, boolean commit) throws RestException;
+
+    void unassign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
+
+    void assignOne(RestSession<?> session, RestObject childRestObj) throws RestException;
 }

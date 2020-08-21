@@ -36,6 +36,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -49,6 +50,7 @@ import net.nuagenetworks.bambou.util.BambouUtils;
 
 public class RestObject implements RestObjectOperations, Serializable {
 
+    private static final String PATCH_TYPE_HEADER = "X-Nuage-PatchType";
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(RestObject.class);
@@ -120,6 +122,77 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    @Override
+    public void unassign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
+        String params = BambouUtils.getResponseChoiceParam(1);
+    	// Make sure the child objects passed in is not null or empty
+    	if (childRestObjs == null || childRestObjs.size() == 0) {	
+    		throw new RestException("Child objects was null or empty.");	
+    	}
+        
+        // Extract IDs from the specified child objects
+        List<String> ids = new ArrayList<String>();
+        for (RestObject restObject : childRestObjs) {
+            ids.add(restObject.getId());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(PATCH_TYPE_HEADER, "REMOVE");
+        Class<?> childRestObjClass = childRestObjs.get(0).getClass();
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PATCH, getResourceUrlForChildType(session, childRestObjClass), params, headers, ids, BambouUtils.getArrayClass(this));
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
+            if (commit) {
+                // Add all the children passed in to the fetcher
+                for (RestObject childRestObj : childRestObjs) {
+                    removeChild(childRestObj);
+                }
+            }
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+    }
+
+    @Override
+    public void assignOne(RestSession<?> session, RestObject childRestObj) throws RestException {
+        String params = BambouUtils.getResponseChoiceParam(1);
+        
+        // Extract IDs from the specified child objects
+        List<String> ids = new ArrayList<String>();
+        ids.add(childRestObj.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(PATCH_TYPE_HEADER, "ADD");
+        Class<?> childRestObjClass = childRestObj.getClass();
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.PATCH, getResourceUrlForChildType(session, childRestObjClass), params, headers, ids, BambouUtils.getArrayClass(this));
+        if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
+            addChild(childRestObj);
+        } else {
+            // Error
+            throw new RestException("Response received with status code: " + response.getStatusCode());
+        }
+    }
+
+    @Override
+    public void unassign(List<? extends RestObject> childRestObjs) throws RestException {
+        RestSession<?> session = RestSession.getCurrentSession();
+        if (session != null) {
+            session.unassign(this, childRestObjs, true);
+        } else {
+            throw new RestException("Session not available in current thread");
+        }
+    }
+
+    @Override
+    public void assignOne(RestObject childRestObj) throws RestException {
+        RestSession<?> session = RestSession.getCurrentSession();
+        if (session != null) {
+            session.assignOne(this, childRestObj);
+        } else {
+            throw new RestException("Session not available in current thread");
+        }
     }
 
     @Override
@@ -487,6 +560,20 @@ public class RestObject implements RestObjectOperations, Serializable {
         }
 
         children.clear();
+    }
+
+    private void removeChild(RestObject child) throws RestException {
+    	// Get the object's resource name
+        String restName = getRestName(child.getClass());
+
+        // Add child object to registered fetcher for child type
+        @SuppressWarnings("unchecked")
+        RestFetcher<RestObject> children = (RestFetcher<RestObject>) fetcherRegistry.get(restName);
+        if (children == null) {
+            throw new RestException(String.format("Could not find fetcher with name %s while removing children in parent %s", restName, this));
+        }
+
+        children.remove(child);
     }
 
     @JsonIgnore

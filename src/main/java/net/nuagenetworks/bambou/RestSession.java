@@ -317,6 +317,16 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     }
 
     @Override
+    public void unassign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
+        restObj.unassign(this, childRestObjs, commit);
+    }
+
+    @Override
+    public void assignOne(RestObject restObj, RestObject childRestObj) throws RestException {
+        restObj.assignOne(this, childRestObj);
+    }
+
+    @Override
     public void assign(RestObject restObj, List<? extends RestObject> childRestObjs) throws RestException {
         restObj.assign(this, childRestObjs);
     }

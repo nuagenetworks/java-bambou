@@ -88,4 +88,6 @@ public interface RestSessionOperations {
             String queryParameters, boolean commit) throws RestException;
 
     void assign(RestObject restObj, List<? extends RestObject> childRestObjs, Integer responseChoice, boolean commit) throws RestException;
+    void unassign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException;
+    void assignOne(RestObject restObj, RestObject childRestObj) throws RestException;
 }
