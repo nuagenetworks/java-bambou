@@ -64,15 +64,6 @@ public class RestObject implements RestObjectOperations, Serializable {
     @JsonProperty(value = "parentType")
     protected String parentType;
 
-    @JsonProperty(value = "creationDate")
-    protected String creationDate;
-
-    @JsonProperty(value = "lastUpdatedDate")
-    protected String lastUpdatedDate;
-
-    @JsonProperty(value = "owner")
-    protected String owner;
-
     private transient Map<String, RestFetcher<? extends RestObject>> fetcherRegistry = Collections
             .synchronizedMap(new HashMap<String, RestFetcher<? extends RestObject>>());
 
@@ -98,30 +89,6 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     public void setParentType(String parentType) {
         this.parentType = parentType;
-    }
-
-    public String getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(String creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public String getLastUpdatedDate() {
-        return lastUpdatedDate;
-    }
-
-    public void setLastUpdatedDate(String lastUpdatedDate) {
-        this.lastUpdatedDate = lastUpdatedDate;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     @Override
@@ -628,7 +595,6 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     @Override
     public String toString() {
-        return "RestObject [id=" + id + ", parentId=" + parentId + ", parentType=" + parentType + ", creationDate=" + creationDate + ", lastUpdatedDate="
-                + lastUpdatedDate + ", owner=" + owner + ", fetcherRegistry=" + fetcherRegistry + "]";
+        return "RestObject [id=" + id + ", parentId=" + parentId + ", parentType=" + parentType + ", fetcherRegistry=" + fetcherRegistry + "]";
     }
 }

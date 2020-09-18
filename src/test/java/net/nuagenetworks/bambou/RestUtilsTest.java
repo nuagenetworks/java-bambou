@@ -55,16 +55,10 @@ public class RestUtilsTest {
         restObjNode.put("ID", "123");
         restObjNode.put("parentID", "456");
         restObjNode.put("parentType", "MyParentType");
-        restObjNode.put("creationDate", "34567");
-        restObjNode.put("lastUpdatedDate", "123456");
-        restObjNode.put("owner", "MyOwner");
         RestObject restObj = RestUtils.createRestObjectWithContent(RestObject.class, restObjNode);
         Assert.assertEquals("123", restObj.getId());
         Assert.assertEquals("456", restObj.getParentId());
         Assert.assertEquals("MyParentType", restObj.getParentType());
-        Assert.assertEquals("34567", restObj.getCreationDate());
-        Assert.assertEquals("123456", restObj.getLastUpdatedDate());
-        Assert.assertEquals("MyOwner", restObj.getOwner());
     }
     
     @Test
@@ -73,9 +67,6 @@ public class RestUtilsTest {
     	object.setId("123");
     	object.setParentId("456");
     	object.setParentType("MyParentType");
-    	object.setCreationDate("34567");
-    	object.setLastUpdatedDate("123456");
-    	object.setOwner("MyOwner");
     	
     	String content = RestUtils.toString(object);
     	JsonNode node = RestUtils.toJson(content);
@@ -83,9 +74,6 @@ public class RestUtilsTest {
     	Assert.assertEquals("123", node.get("ID").asText());
         Assert.assertEquals("456", node.get("parentID").asText());
         Assert.assertEquals("MyParentType", node.get("parentType").asText());
-        Assert.assertEquals("34567", node.get("creationDate").asText());
-        Assert.assertEquals("123456", node.get("lastUpdatedDate").asText());
-        Assert.assertEquals("MyOwner", node.get("owner").asText());
     }
     
     @Test

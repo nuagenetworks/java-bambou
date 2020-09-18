@@ -81,24 +81,16 @@ public class RestObjectTest {
         String id = "12345";
         String parentId = "67890";
         String parentType = "parentType";
-        String creationDate = "2016-03-21";
-        String lastUpdatedDate = "2016-03-22";
         String owner = "martin";
 
         RestObject object = new RestObject();
         object.setId(id);
         object.setParentId(parentId);
         object.setParentType(parentType);
-        object.setCreationDate(creationDate);
-        object.setLastUpdatedDate(lastUpdatedDate);
-        object.setOwner(owner);
 
         Assert.assertEquals(id, object.getId());
         Assert.assertEquals(parentId, object.getParentId());
         Assert.assertEquals(parentType, object.getParentType());
-        Assert.assertEquals(creationDate, object.getCreationDate());
-        Assert.assertEquals(lastUpdatedDate, object.getLastUpdatedDate());
-        Assert.assertEquals(owner, object.getOwner());
     }
 
     @Test
