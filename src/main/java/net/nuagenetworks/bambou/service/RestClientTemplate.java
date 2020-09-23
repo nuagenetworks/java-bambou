@@ -26,34 +26,64 @@
 */
 package net.nuagenetworks.bambou.service;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Proxy.Type;
-
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.HttpHost;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class RestClientTemplate extends RestTemplate {
 
     private static final int DEFAULT_SOCKET_TIMEOUT_IN_MS = 60 * 1000;
+    private int socketTimeout = DEFAULT_SOCKET_TIMEOUT_IN_MS;
+    private int proxyPort = 0;
+    private String proxyHost = null;
+    
+    private boolean certValidationDisabled = false;
+
+    CloseableHttpClient httpClient;
 
     public RestClientTemplate() {
-        super(new SimpleClientHttpRequestFactory());
+        super();
 
-        setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
+        this.httpClient = this.createClient(); 
+        this.setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
+    }
+
+    public HttpComponentsClientHttpRequestFactory getRequestFactory() {
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setHttpClient(this.httpClient);
+
+        return requestFactory;
+    }
+
+    public void disableCertificateValidation() {
+        this.certValidationDisabled = true;
+        this.httpClient = this.createClient();
     }
 
     public void setSocketTimeout(int socketTimeout) {
         if (socketTimeout > 0) {
             // Debug
             logger.debug("Using socket timeout for REST connection: " + socketTimeout);
-
-            // Set connect and read timeouts
-            SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
-            requestFactory.setConnectTimeout(socketTimeout);
-            requestFactory.setReadTimeout(socketTimeout);
+            this.socketTimeout = socketTimeout;
+            this.httpClient = this.createClient();
         }
     }
 
@@ -61,11 +91,54 @@ public class RestClientTemplate extends RestTemplate {
         if (host != null && !host.isEmpty()) {
             // Debug
             logger.debug("Using HTTP proxy for REST connection: " + host + ":" + port);
+            
+            this.proxyHost = host;
+            this.proxyPort = port;
 
-            // Set proxy
-            SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
-            Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(host, port));
-            requestFactory.setProxy(proxy);
+            this.httpClient = this.createClient();
         }
     }
+
+    private CloseableHttpClient createClient() {
+            SSLContextBuilder builder = new SSLContextBuilder();
+            SSLConnectionSocketFactory factory;
+            HttpClientBuilder clientBuilder = HttpClients.custom();
+
+            try {
+                if (this.certValidationDisabled) {
+                    builder.loadTrustMaterial(null, new TrustStrategy() {
+                        @Override
+                        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                            return true;
+                        }
+                    });
+                    factory = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
+                } else {
+                    factory = new SSLConnectionSocketFactory(builder.build());
+                }
+
+                RequestConfig config = RequestConfig.custom()
+                  .setConnectTimeout(this.socketTimeout)
+                  .setConnectionRequestTimeout(this.socketTimeout)
+                  .setSocketTimeout(this.socketTimeout).build();
+
+
+                if (this.proxyHost != null && this.proxyPort != 0) {
+                    HttpHost httpProxy = new HttpHost(this.proxyHost, this.proxyPort);
+                    DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(httpProxy);
+                    clientBuilder.setRoutePlanner(routePlanner);
+                }
+    
+                return clientBuilder 
+                  .setDefaultRequestConfig(config)
+                  .setSSLSocketFactory(factory).build();
+            } catch (NoSuchAlgorithmException e) {
+                return null;
+            } catch (KeyManagementException e) {
+                return null;
+            } catch (KeyStoreException e) {
+                return null;
+            }
+    }
+
 }
