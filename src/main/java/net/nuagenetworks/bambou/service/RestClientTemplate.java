@@ -26,23 +26,34 @@
 */
 package net.nuagenetworks.bambou.service;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Proxy.Type;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.HttpHost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.CloseableHttpClient;
 
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class RestClientTemplate extends RestTemplate {
 
     private static final int DEFAULT_SOCKET_TIMEOUT_IN_MS = 60 * 1000;
 
-    public RestClientTemplate() {
-        super(new SimpleClientHttpRequestFactory());
+    CloseableHttpClient httpClient;
 
+    public RestClientTemplate() {
+        super();
+
+        this.httpClient = HttpClients.custom().build(); 
         setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
+    }
+
+    public HttpComponentsClientHttpRequestFactory getRequestFactory() {
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setHttpClient(this.httpClient);
+
+        return requestFactory;
     }
 
     public void setSocketTimeout(int socketTimeout) {
@@ -51,7 +62,7 @@ public class RestClientTemplate extends RestTemplate {
             logger.debug("Using socket timeout for REST connection: " + socketTimeout);
 
             // Set connect and read timeouts
-            SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
+            HttpComponentsClientHttpRequestFactory requestFactory = getRequestFactory();
             requestFactory.setConnectTimeout(socketTimeout);
             requestFactory.setReadTimeout(socketTimeout);
         }
@@ -63,9 +74,8 @@ public class RestClientTemplate extends RestTemplate {
             logger.debug("Using HTTP proxy for REST connection: " + host + ":" + port);
 
             // Set proxy
-            SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory) getRequestFactory();
-            Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(host, port));
-            requestFactory.setProxy(proxy);
+            HttpHost proxy = new HttpHost(host, port);
+            this.httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,proxy);
         }
     }
 }
