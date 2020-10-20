@@ -42,6 +42,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -105,15 +106,16 @@ public class RestClientTemplate extends RestTemplate {
 
             try {
                 if (this.certValidationDisabled) {
-        
                     builder.loadTrustMaterial(null, new TrustStrategy() {
                         @Override
                         public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                             return true;
                         }
                     });
+                    factory = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
+                } else {
+                    factory = new SSLConnectionSocketFactory(builder.build());
                 }
-                factory = new SSLConnectionSocketFactory(builder.build());
 
                 RequestConfig config = RequestConfig.custom()
                   .setConnectTimeout(this.socketTimeout)
