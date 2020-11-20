@@ -53,6 +53,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     private static final String ORGANIZATION_HEADER = "X-Nuage-Organization";
     private static final String CONTENT_TYPE_JSON = "application/json";
+    private static final String IMPERSONATION_HEADER = "X-Nuage-ProxyUser";
 
     private static final Logger logger = LoggerFactory.getLogger(RestSession.class);
     private static final ThreadLocal<RestSession<?>> currentSession = new ThreadLocal<RestSession<?>>();
@@ -63,6 +64,8 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
     private String username;
     private String password;
     private String enterprise;
+    private String impersonationUsername;
+    private String impersonationEnterprise;
     private String apiUrl;
     private String apiPrefix;
     private String certificate;
@@ -78,6 +81,14 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     public String getUsername() {
         return username;
+    }
+
+    public void setImpersonationUsername(String username) {
+        this.impersonationUsername = username;
+    }
+
+    public void setImpersonationEnterprise(String enterprise) {
+        this.impersonationEnterprise = enterprise;
     }
 
     public void setUsername(String username) {
@@ -394,13 +405,18 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
             headers = new HttpHeaders();
         }
 
+        if (this.impersonationUsername != null && this.impersonationEnterprise != null) {
+            headers.set(IMPERSONATION_HEADER, this.impersonationUsername+"@"+this.impersonationEnterprise);
+        }
+
         headers.set(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
         headers.set(ORGANIZATION_HEADER, getEnterprise());
         headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
 
+        ResponseEntity<T> retValue = null;
         logger.info(url);
         try {
-            return restClientService.sendRequest(method, url, headers, requestObj, responseType);
+            retValue = restClientService.sendRequest(method, url, headers, requestObj, responseType);
         } catch (RestStatusCodeException ex) {
             if (ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 // Debug
@@ -426,6 +442,11 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
                 throw ex;
             }
         }
+        if (retValue == null || retValue.getBody() == null) {
+            throw new RestException("Received null response");
+        }
+
+        return retValue;
     }
 
     protected String getRestBaseUrl() {
