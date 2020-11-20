@@ -405,7 +405,7 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
             headers = new HttpHeaders();
         }
 
-        if (this.impersonationUsername != null) {
+        if (this.impersonationUsername != null && this.impersonationEnterprise != null) {
             headers.set(IMPERSONATION_HEADER, this.impersonationUsername+"@"+this.impersonationEnterprise);
         }
 
