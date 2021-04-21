@@ -216,13 +216,13 @@ public class RestClientService {
                     // Raise an exception with status code, description and
                     // internal error code
                     throw new RestStatusCodeException(statusCode, errorMessage, internalErrorCode);
-                } catch (JsonParseException | JsonMappingException ex) {
+                } catch (Exception ex) {
                     // No error message available in the response
                     switch (statusCode.series()) {
                     case CLIENT_ERROR:
-                        throw new RestStatusCodeException(statusCode);
+                        throw new RestStatusCodeException(ex, statusCode);
                     case SERVER_ERROR:
-                        throw new RestStatusCodeException(statusCode);
+                        throw new RestStatusCodeException(ex, statusCode);
                     default:
                         throw new RestClientException("Unknown status code [" + statusCode + "]");
                     }
