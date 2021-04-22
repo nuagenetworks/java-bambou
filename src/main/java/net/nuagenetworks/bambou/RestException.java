@@ -37,4 +37,9 @@ public class RestException extends Exception {
     public RestException(Exception cause) {
         super(cause);
     }
+
+    public RestException(Exception cause, String message) {
+        super(message, cause);
+    }
+
 }
