@@ -45,6 +45,7 @@ import net.nuagenetworks.bambou.RestObject;
 public class BambouUtils {
 
     private static final String RESPONSE_CHOICE_PARAM = "responseChoice";
+    private static final String EMBEDED_METADATA_PARAM = "embeddedMetadata";
 
     public static String toString(Object content) throws RestException {
         try {
@@ -93,6 +94,14 @@ public class BambouUtils {
             setRestObjectProperty(pd, restObj, template.getId());
         } else {
             throw new RestException(String.format("Cannot instantiate a child that does not have a templateID property: %s", restObj));
+        }
+    }
+
+    public static String getEmbededMetadataParam(boolean withMetadata) {
+        if (!withMetadata) {
+            return null;
+        } else {
+            return EMBEDED_METADATA_PARAM + "=1";
         }
     }
 

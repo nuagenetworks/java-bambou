@@ -37,6 +37,8 @@ public interface RestObjectOperations {
 
     void fetch() throws RestException;
 
+    void fetch(boolean withMetadata) throws RestException;
+
     void save() throws RestException;
 
     void save(Integer responseChoice) throws RestException;
@@ -64,6 +66,8 @@ public interface RestObjectOperations {
     void assign(List<? extends RestObject> childRestObjs,Integer responseChoice, boolean commit) throws RestException;
     
     <T extends RestObject> BulkResponse<T> createChildren(List<T> children) throws RestException;
+
+    void fetch(RestSession<?> session, boolean withMetadata) throws RestException;
 
     void fetch(RestSession<?> session) throws RestException;
 

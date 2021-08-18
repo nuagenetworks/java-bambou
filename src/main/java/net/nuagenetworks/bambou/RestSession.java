@@ -283,7 +283,12 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
 
     @Override
     public void fetch(RestObject restObj) throws RestException {
-        restObj.fetch(this);
+        restObj.fetch(this, false);
+    }
+
+    @Override
+    public void fetch(RestObject restObj, boolean withMetadata) throws RestException {
+        restObj.fetch(this, withMetadata);
     }
 
     @Override

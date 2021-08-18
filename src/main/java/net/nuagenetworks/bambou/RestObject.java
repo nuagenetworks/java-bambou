@@ -164,9 +164,14 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     @Override
     public void fetch() throws RestException {
+        this.fetch(false);
+    }
+
+    @Override
+    public void fetch(boolean withMetadata) throws RestException {
         RestSession<?> session = RestSession.getCurrentSession();
         if (session != null) {
-            session.fetch(this);
+            session.fetch(this, withMetadata);
         } else {
             throw new RestException("Session not available in current thread");
         }
@@ -299,7 +304,13 @@ public class RestObject implements RestObjectOperations, Serializable {
 
     @Override
     public void fetch(RestSession<?> session) throws RestException {
-        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.GET, getResourceUrl(session), null, null, null,
+        this.fetch(session, false);
+    }
+
+    @Override
+    public void fetch(RestSession<?> session, boolean withMetadata) throws RestException {
+        String params = BambouUtils.getEmbededMetadataParam(withMetadata);
+        ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.GET, getResourceUrl(session), params, null, null,
                 BambouUtils.getArrayClass(this));
         if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL && response.getBody().length == 1) {
             // Success

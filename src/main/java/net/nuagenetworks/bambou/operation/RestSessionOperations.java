@@ -39,6 +39,8 @@ public interface RestSessionOperations {
 
     void reset() throws RestException;
 
+    void fetch(RestObject restObj, boolean withMetadata) throws RestException;
+
     void fetch(RestObject restObj) throws RestException;
 
     void save(RestObject restObj) throws RestException;
