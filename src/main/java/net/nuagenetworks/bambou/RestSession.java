@@ -418,10 +418,9 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         headers.set(ORGANIZATION_HEADER, getEnterprise());
         headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
 
-        ResponseEntity<T> retValue = null;
         logger.info(url);
         try {
-            retValue = restClientService.sendRequest(method, url, headers, requestObj, responseType);
+            return restClientService.sendRequest(method, url, headers, requestObj, responseType);
         } catch (RestStatusCodeException ex) {
             if (ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 // Debug
@@ -447,11 +446,6 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
                 throw ex;
             }
         }
-        if (retValue == null || retValue.getBody() == null) {
-            throw new RestException("Received null response");
-        }
-
-        return retValue;
     }
 
     protected String getRestBaseUrl() {
