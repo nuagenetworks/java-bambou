@@ -216,6 +216,8 @@ public class RestClientService {
                     // Raise an exception with status code, description and
                     // internal error code
                     throw new RestStatusCodeException(statusCode, errorMessage, internalErrorCode);
+                } catch (RestStatusCodeException restStatusCodeException) {
+                    throw restStatusCodeException;
                 } catch (Exception ex) {
                     // No error message available in the response
                     switch (statusCode.series()) {
