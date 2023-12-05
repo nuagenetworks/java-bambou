@@ -27,26 +27,23 @@
 package net.nuagenetworks.bambou;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import net.nuagenetworks.bambou.annotation.RestEntity;
 import net.nuagenetworks.bambou.jms.RestPushCenterJmsActiveMQ;
 import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectActiveMQ;
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectJBoss;
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsJBoss;
 import net.nuagenetworks.bambou.operation.RestSessionOperations;
 import net.nuagenetworks.bambou.service.RestClientService;
-import net.nuagenetworks.bambou.annotation.RestEntity;
 import net.nuagenetworks.bambou.util.BambouUtils;
 
 public class RestSession<R extends RestRootObject> implements RestSessionOperations {
@@ -206,39 +203,27 @@ public class RestSession<R extends RestRootObject> implements RestSessionOperati
         RestPushCenter pushCenter;
 
         if (pushCenterType == RestPushCenterType.JMS) {
-            if (version >= 5.0) {
-                // VSD version 5.0.x uses a different JMS client than previous
-                // releases
-                RestPushCenterJmsActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsActiveMQ();
-                if (username != null && password != null && enterprise != null) {
-                    String jmsUser = username + "@" + enterprise;
-                    String jmsPassword = password;
-                    pushCenterJmsActiveMQ.setUser(jmsUser);
-                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
-                }
-                pushCenter = pushCenterJmsActiveMQ;
-            } else {
-                pushCenter = new RestPushCenterJmsJBoss();
+            RestPushCenterJmsActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsActiveMQ();
+            if (username != null && password != null && enterprise != null) {
+                String jmsUser = username + "@" + enterprise;
+                String jmsPassword = password;
+                pushCenterJmsActiveMQ.setUser(jmsUser);
+                pushCenterJmsActiveMQ.setPassword(jmsPassword);
             }
+            pushCenter = pushCenterJmsActiveMQ;
         } else if (pushCenterType == RestPushCenterType.JMS_NO_JNDI) {
-            if (version >= 5.0) {
-                // VSD version 5.0.x uses a different JMS client than previous
-                // releases
-                RestPushCenterJmsDirectActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsDirectActiveMQ();
-                if (username != null && password != null && enterprise != null) {
-                    String jmsUser = username + "@" + enterprise;
-                    String jmsPassword = password;
-                    pushCenterJmsActiveMQ.setUser(jmsUser);
-                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
-                }
-                pushCenter = pushCenterJmsActiveMQ;
-            } else {
-                pushCenter = new RestPushCenterJmsDirectJBoss();
+            RestPushCenterJmsDirectActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsDirectActiveMQ();
+            if (username != null && password != null && enterprise != null) {
+                String jmsUser = username + "@" + enterprise;
+                String jmsPassword = password;
+                pushCenterJmsActiveMQ.setUser(jmsUser);
+                pushCenterJmsActiveMQ.setPassword(jmsPassword);
             }
+            pushCenter = pushCenterJmsActiveMQ;
         } else {
             pushCenter = new RestPushCenterLongPoll(this);
         }
-
+        
         String url = getRestBaseUrl();
         pushCenter.setUrl(url);
 

@@ -35,16 +35,16 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.nuagenetworks.bambou.annotation.RestEntity;
-import net.nuagenetworks.bambou.BulkResponse;
 import net.nuagenetworks.bambou.operation.RestObjectOperations;
 import net.nuagenetworks.bambou.util.BambouUtils;
 

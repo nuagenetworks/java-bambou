@@ -48,7 +48,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.nuagenetworks.bambou.RestSession;
 import net.nuagenetworks.bambou.model.Events;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
 import net.nuagenetworks.bambou.testobj.TestRootObject;

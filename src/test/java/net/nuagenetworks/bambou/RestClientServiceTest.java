@@ -41,7 +41,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.client.RestOperations;
 
-import net.nuagenetworks.bambou.RestException;
 import net.nuagenetworks.bambou.service.RestClientService;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
 
@@ -93,7 +92,7 @@ public class RestClientServiceTest {
         } catch (RestStatusCodeException ex) {
             // Expect exception
             Assert.assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-            Assert.assertEquals("404/Not Found", ex.getMessage());
+            Assert.assertEquals("404 NOT_FOUND Not Found", ex.getMessage());
             Assert.assertNull(ex.getInternalErrorCode());
         }
 
@@ -118,7 +117,7 @@ public class RestClientServiceTest {
         } catch (RestStatusCodeException ex) {
             // Expect exception
             Assert.assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-            Assert.assertEquals("404 Not Found", ex.getMessage());
+            Assert.assertEquals("404 NOT_FOUND Not Found", ex.getMessage());
             Assert.assertEquals("1001", ex.getInternalErrorCode());
         }
 
