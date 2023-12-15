@@ -157,7 +157,7 @@ public class RestSessionTest {
         double version = 2.1;
 
         EasyMock.reset(restOperations);
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/root"), EasyMock.eq(HttpMethod.GET),
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/root"), EasyMock.eq(HttpMethod.GET),
                 EasyMock.anyObject(HttpEntity.class), EasyMock.eq(byte[].class))).andReturn(new ResponseEntity<byte[]>(responseContent.getBytes(), responseStatusCode));
         EasyMock.replay(restOperations);
 

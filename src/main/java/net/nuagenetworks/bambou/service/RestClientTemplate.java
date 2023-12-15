@@ -26,23 +26,22 @@
 */
 package net.nuagenetworks.bambou.service;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
-import java.security.cert.X509Certificate;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.params.CoreConnectionPNames;
+import java.security.cert.X509Certificate;
+
 import org.apache.http.HttpHost;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 

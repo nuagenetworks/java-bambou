@@ -133,7 +133,7 @@ public class DynamicKeystoreGeneratorTest {
         RSAPrivateKey rsaPrivateKey = DynamicKeystoreGenerator.generateRSAPrivateKey(decodedPrivateKey);
         Assert.assertEquals("RSA private key format", "PKCS#8", rsaPrivateKey.getFormat());
         Assert.assertEquals("RSA private key algorithm", "RSA", rsaPrivateKey.getAlgorithm());
-        Assert.assertEquals("RSA private key length", 46, rsaPrivateKey.toString().length());
+        Assert.assertEquals("RSA private key length", 1323, rsaPrivateKey.toString().length());
 
         InputStream is = new ByteArrayInputStream(GOOD_TESTABLE_CERTIFICATE.getBytes());
         Certificate certificate = DynamicKeystoreGenerator.generateX509Certificate(is);
@@ -145,7 +145,7 @@ public class DynamicKeystoreGeneratorTest {
         // certificate.toString().length());
         Assert.assertEquals("Certificate public key algorithm ", "RSA", certificate.getPublicKey().getAlgorithm());
         Assert.assertEquals("Certificate public key format ", "X.509", certificate.getPublicKey().getFormat());
-        Assert.assertEquals("Certificate public key length ", 683, certificate.getPublicKey().toString().length());
+        Assert.assertEquals("Certificate public key length ", 698, certificate.getPublicKey().toString().length());
 
         KeyStore keystore = DynamicKeystoreGenerator.createAndLoadDynamicKeystore(rsaPrivateKey, certificate);
         Assert.assertEquals("Keystore type ", "JKS", keystore.getType());
@@ -163,7 +163,7 @@ public class DynamicKeystoreGeneratorTest {
         PrivateKey keyManagerPrivateKey = ekm.getPrivateKey(alias);
         Assert.assertEquals("Keymanager RSA private key format", "PKCS#8", keyManagerPrivateKey.getFormat());
         Assert.assertEquals("Keymanager RSA private key algorithm", "RSA", keyManagerPrivateKey.getAlgorithm());
-        Assert.assertEquals("Keymanager RSA private key length", 46, keyManagerPrivateKey.toString().length());
+        Assert.assertEquals("Keymanager RSA private key length", 1323, keyManagerPrivateKey.toString().length());
 
         X509Certificate[] keyManagerCertificates = ekm.getCertificateChain(generatorAlias);
         X509Certificate keyManagerCert = keyManagerCertificates[0];

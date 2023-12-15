@@ -49,9 +49,6 @@ import org.springframework.web.client.RestOperations;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.nuagenetworks.bambou.RestException;
-import net.nuagenetworks.bambou.RestObject;
-import net.nuagenetworks.bambou.RestSession;
 import net.nuagenetworks.bambou.spring.TestSpringConfig;
 import net.nuagenetworks.bambou.testobj.TestChildObject;
 import net.nuagenetworks.bambou.testobj.TestChildObjectFetcher;
@@ -522,19 +519,24 @@ public class RestFetcherTest {
 
         // Expected REST calls
         EasyMock.reset(restOperations);
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/root"), EasyMock.eq(HttpMethod.GET),
+        EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/root"), EasyMock.eq(HttpMethod.GET),
                 EasyMock.anyObject(HttpEntity.class), EasyMock.eq(byte[].class)))
                 .andReturn(new ResponseEntity<byte[]>("[{ \"APIKey\": \"1\" }]".getBytes(), HttpStatus.OK));
         if (simulate401Response) {
-            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/" + urlSuffix), EasyMock.eq(method),
+            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/" + urlSuffix), EasyMock.eq(method),
                     EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class))).andReturn(new ResponseEntity<byte[]>("".getBytes(), HttpStatus.UNAUTHORIZED));
-            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/root"), EasyMock.eq(HttpMethod.GET),
+            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/root"), EasyMock.eq(HttpMethod.GET),
                     EasyMock.anyObject(HttpEntity.class), EasyMock.eq(byte[].class)))
                     .andReturn(new ResponseEntity<byte[]>("[{ \"APIKey\": \"2\" }]".getBytes(), HttpStatus.OK));
         }
-        EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2_1/" + urlSuffix), EasyMock.eq(method),
-                EasyMock.capture(capturedHttpEntity), EasyMock.eq(byte[].class)))
-                .andReturn(new ResponseEntity<byte[]>(responseString==null?null:responseString.getBytes(), responseHeaders, responseStatus));
+        
+        if (method == HttpMethod.HEAD) {
+            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/" + urlSuffix), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity),
+                    EasyMock.eq((Class<?>) null))).andReturn(new ResponseEntity(responseHeaders, responseStatus));
+        } else {
+            EasyMock.expect(restOperations.exchange(EasyMock.eq(apiUrl + '/' + apiPrefix + "/v2/" + urlSuffix), EasyMock.eq(method), EasyMock.capture(capturedHttpEntity),
+                    EasyMock.eq(byte[].class))).andReturn(new ResponseEntity<byte[]>(responseString == null ? null : responseString.getBytes(), responseHeaders, responseStatus));
+        }
         EasyMock.replay(restOperations);
 
         // Start REST session

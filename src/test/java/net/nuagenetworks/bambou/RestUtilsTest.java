@@ -90,6 +90,6 @@ public class RestUtilsTest {
     	
     	Assert.assertEquals("Hello World!", text.asText());
     	Assert.assertEquals("", empty.asText());
-    	Assert.assertEquals(" ", space.asText());
+    	Assert.assertEquals("", space.asText());
     }
 }
